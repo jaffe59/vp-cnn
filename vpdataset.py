@@ -2,6 +2,7 @@ from torchtext import data
 import os
 import pdb
 import random
+import math
 
 class VP(data.Dataset):
     """modeled after Shawn1993 github user's Pytorch implementation of Kim2014 - cnn for text categorization"""
@@ -40,8 +41,8 @@ class VP(data.Dataset):
 
     @classmethod
     #def splits(cls, text_field, label_field, dev_ratio=.1, shuffle=True ,root='.', **kwargs):
-    def splits(cls, text_field, label_field, dev_ratio=.1, shuffle=False ,root='.', **kwargs):
-
+    def splits(cls, text_field, label_field, numfolds=10, foldid=None, dev_ratio=.1, shuffle=False ,root='.', **kwargs):
+        
         """Create dataset objects for splits of the VP dataset.
 
         Arguments:
@@ -60,7 +61,28 @@ class VP(data.Dataset):
         #examples = cls(text_field, label_field, path=path, **kwargs).examples
         examples = cls(text_field, label_field, path=root, **kwargs).examples
         if shuffle: random.shuffle(examples)
-        dev_index = -1 * int(dev_ratio*len(examples))
+        
+        if foldid==None:
+            dev_index = -1 * int(dev_ratio*len(examples))
+            return (cls(text_field, label_field, examples=examples[:dev_index]),
+                    cls(text_field, label_field, examples=examples[dev_index:]))
+        else:
+            #get all folds
+            fold_size = math.floor(len(examples)/numfolds)
+            folds = []
+            for fold in range(numfolds):
+                startidx = fold*fold_size
+                endidx = startidx+fold_size
+                folds += [examples[startidx:endidx]]
 
-        return (cls(text_field, label_field, examples=examples[:dev_index]),
-                cls(text_field, label_field, examples=examples[dev_index:]))
+            #take all folds except foldid as training/dev
+            traindev = [fold for idx, fold in enumerate(folds) if idx != foldid]
+            traindev = [item for sublist in traindev for item in sublist]
+            dev_index = -1 * int(dev_ratio*len(traindev))
+
+            #test will be entire held out section (foldid)
+            test = folds[foldid]
+
+            return (cls(text_field, label_field, examples=traindev[:dev_index]),
+                    cls(text_field, label_field, examples=traindev[dev_index:]),
+                    cls(text_field, label_field, examples=test))

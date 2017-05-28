@@ -37,6 +37,7 @@ parser.add_argument('-no-cuda', action='store_true', default=False, help='disabl
 parser.add_argument('-snapshot', type=str, default=None, help='filename of model snapshot [default: None]')
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
+parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
 args = parser.parse_args()
 
 
@@ -66,66 +67,87 @@ def mr(text_field, label_field, **kargs):
     return train_iter, dev_iter
 
 #load VP dataset
-def vp(text_field, label_field, **kargs):
-    train_data, dev_data = vpdataset.VP.splits(text_field, label_field) 
-    text_field.build_vocab(train_data, dev_data)
-    label_field.build_vocab(train_data, dev_data)
-    train_iter, dev_iter = data.BucketIterator.splits(
-                                        (train_data, dev_data), 
+def vp(text_field, label_field, foldid, **kargs):
+    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid) 
+    text_field.build_vocab(train_data, dev_data, test_data)
+    label_field.build_vocab(train_data, dev_data, test_data)
+    train_iter, dev_iter, test_iter = data.BucketIterator.splits(
+                                        (train_data, dev_data, test_data), 
                                         batch_sizes=(args.batch_size, 
-                                                     len(dev_data)),
+                                                     len(dev_data),
+                                                     len(test_data)),
                                         **kargs)
-    return train_iter, dev_iter 
+    return train_iter, dev_iter, test_iter
 
 def char_tokenizer(mstring):
     return list(mstring)
 
-# load data
-print("\nLoading data...")
-#text_field = data.Field(lower=True)
-#label_field = data.Field(sequential=False)
-#train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
-#train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
-text_field = data.Field(lower=True, tokenize=char_tokenizer)
-label_field = data.Field(sequential=False)
-train_iter, dev_iter = vp(text_field, label_field, device=-1, repeat=False)
+print("Beginning {0}-fold cross-validation...".format(args.xfolds))
+fold_accuracies = []
+orig_save_dir = args.save_dir
+update_args = True
 
-# update args and print
-args.embed_num = len(text_field.vocab)
-args.class_num = len(label_field.vocab) - 1
-args.cuda = args.no_cuda and torch.cuda.is_available(); del args.no_cuda
-args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
-args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+for xfold in range(args.xfolds):
+    print("Fold {0}".format(xfold))
+    # load data
+    print("\nLoading data...")
+    #text_field = data.Field(lower=True)
+    #label_field = data.Field(sequential=False)
+    #train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
+    #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
-print("\nParameters:")
-for attr, value in sorted(args.__dict__.items()):
-    print("\t{}={}".format(attr.upper(), value))
+    text_field = data.Field(lower=True, tokenize=char_tokenizer)
+    label_field = data.Field(sequential=False)
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False)
+
+    # update args and print
+    args.embed_num = len(text_field.vocab)
+    args.class_num = len(label_field.vocab) - 1
+    args.cuda = args.no_cuda and torch.cuda.is_available()#; del args.no_cuda
+    if update_args==True:
+        args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
+        args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    else:
+        args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    print("\nParameters:")
+    for attr, value in sorted(args.__dict__.items()):
+        print("\t{}={}".format(attr.upper(), value))
 
 
-# model
-if args.snapshot is None:
-    cnn = model.CNN_Text(args)
-else :
-    print('\nLoading model from [%s]...' % args.snapshot)
-    try:
-        cnn = torch.load(args.snapshot)
-    except :
-        print("Sorry, This snapshot doesn't exist."); exit()
-        
+    # model
+    if args.snapshot is None:
+        cnn = model.CNN_Text(args)
+    else :
+        print('\nLoading model from [%s]...' % args.snapshot)
+        try:
+            cnn = torch.load(args.snapshot)
+        except :
+            print("Sorry, This snapshot doesn't exist."); exit()
+            
 
-#pdb.set_trace()
-# train or predict
-if args.predict is not None:
-    label = train.predict(args.predict, cnn, text_field, label_field)
-    print('\n[Text]  {}[Label] {}\n'.format(args.predict, label))
-elif args.test :
-    try:
-        train.eval(test_iter, cnn, args) 
-    except Exception as e:
-        print("\nSorry. The test dataset doesn't  exist.\n")
-else :
-    print()
+    #pdb.set_trace()
     train.train(train_iter, dev_iter, cnn, args)
-    
+    result = train.eval(test_iter, cnn, args)
+    fold_accuracies.append(result)
+    print("Completed fold {0}. Accuracy: {1}".format(xfold, result))
+    update_args = False
 
+    """
+    # train or predict
+    if args.predict is not None:
+        label = train.predict(args.predict, cnn, text_field, label_field)
+        print('\n[Text]  {}[Label] {}\n'.format(args.predict, label))
+    elif args.test :
+        try:
+            train.eval(test_iter, cnn, args) 
+        except Exception as e:
+            print("\nSorry. The test dataset doesn't  exist.\n")
+    else :
+        print()
+        train.train(train_iter, dev_iter, cnn, args)
+    """    
+
+average_xfold_accuracy = sum([res for res in fold_accuracies]) / len(fold_accuracies)
+print("folds: {0}".format(len(fold_accuracies)))
+print("Average cross-fold accuracy: {0}".format(average_xfold_accuracy))
