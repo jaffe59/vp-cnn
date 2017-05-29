@@ -158,8 +158,7 @@ def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, 
             char_feature, char_target = char_feature.cuda(), char_target.cuda()
             word_feature, word_target = word_feature.cuda(), word_target.cuda()
 
-        assert char_target.data[0] == word_target.data[0], "Mismatching data sample! {}, {}".format(char_target.data[0],
-                                                                                                    word_target.data[0])
+        assert char_target.data[0] == word_target.data[0], "Mismatching data sample! {}, {}".format(char_target, word_target)
 
         char_output = char_model(char_feature)
         word_output = word_model(word_feature)

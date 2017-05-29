@@ -107,9 +107,7 @@ for xfold in range(args.xfolds):
     word_field = data.Field(lower=True, fix_length=3)
 
     label_field = data.Field(sequential=False)
-    print('char')
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False, shuffle=False)
-    print('word')
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=-1, repeat=False, shuffle=False)
 
     # update args and print
