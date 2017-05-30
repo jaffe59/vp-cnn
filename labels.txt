@@ -1,0 +1,359 @@
+0	what brings you in today
+1	where is the pain
+2	when did the pain start
+3	what makes the pain worse
+4	what do you do for a living
+5	what makes the pain better
+6	are you taking any other medication
+7	what should i call you
+8	any other problems
+9	are you having any other pain
+10	describe the pain
+11	does the pain radiate
+12	how painful is it
+13	how are you
+14	hello
+15	i am medical student
+16	hopefully we can help you
+17	that must be hard
+18	is there anything else i can help you with
+19	good
+20	i have more questions
+21	do you have any pain
+22	is the pain constant
+23	i will do my best
+24	can you rate the pain
+25	are you stressed
+26	does anything else help the pain
+27	did anything happen to cause the pain
+28	what concerns you about the pain
+29	what is your past medical history
+30	have you had back pain before
+31	any prior surgeries
+32	have you ever been in the hospital
+33	are you current on vaccinations
+34	are you taking any medication
+35	any prescription medication
+36	do you have a doctor
+37	are you healthy
+38	i am sorry
+39	do you have any medical problems
+40	are your parents healthy
+41	where do you live
+42	do you live alone
+43	that was nice
+44	are you currently working
+45	what do you do for fun
+46	do you have any hobbies
+47	do you exercise
+48	do you drink
+49	do you use illegal drugs
+50	do you smoke
+51	are you happy
+52	are you sexually active
+53	do you feel safe at home
+54	i'll go report to the doctor
+55	name and date of birth
+56	what do you think about this weather
+57	where do you work
+58	how is work
+59	how much do you work
+60	tell me more about your back pain
+61	how intense is the pain
+62	have you been able to work
+63	that must be awful
+64	you seem uncomfortable
+65	is the pain sharp
+66	how has this affected you
+67	how often do you take the ibuprofen
+68	what was the dose
+69	does the pain interfere with work
+70	any heart problems
+71	are you taking supplements
+72	thanks
+73	have you ever been in an accident
+74	do you have any allergies
+75	any family history of illness
+76	are your parents living
+77	do you have siblings
+78	do you have any children
+79	is your job stressful
+80	do you have any problems urinating
+81	who do you live with
+82	are you dating anyone
+83	what bothers you the most
+84	do you have any questions
+85	goodbye
+86	describe the frequent urination
+87	how is your family
+88	any heart problems in your family
+89	how long have you had the pain
+90	do you have any hip pain
+91	are you married
+92	how long have you been a mechanic
+93	how many sexual partners
+94	do you use any contraception
+95	do you prefer men or women
+96	is the pain new
+97	have you ever had any chronic illnesses
+98	tell me about your grandparents
+99	do you have a significant other
+100	tell me about yourself
+101	what is your name
+102	how did the pain start
+103	were you doing anything when the pain started
+104	is the pain in your upper or lower back
+105	do you do any heavy lifting at work
+106	have you been resting
+107	to summarize
+108	did i miss anything
+109	how is your blood pressure
+110	how is home
+111	is your job pleasurable
+112	can you care for yourself
+113	is your partner male
+114	is pain better when you lie down
+115	do you have pain anywhere else
+116	is the pain worse in the morning or at night
+117	how often do you urinate
+118	do you have any trouble sleeping
+119	how is your diet
+120	do you drink enough fluid
+121	do an exam now
+122	do you have any bladder problems
+123	have you had an accident
+124	does your hip hurt
+125	do you have any bowel problems
+126	are your muscles sore
+127	would you like some pain medication
+128	what kind of medicine is that
+129	did you fall
+130	nice talking with you
+131	are you a new patient
+132	do you mind if i call you jim
+133	how were you lifting
+134	is the pain improving
+135	are you taking any other medication for pain
+136	have you tried ice
+137	have you tried heat or ice
+138	have you had joint pain before
+139	do you have numbness or tingling
+140	do you have loss of bowel or bladder control
+141	does moving increase the pain
+142	do you have any chronic illnesses
+143	any family history of hypertension
+144	are you active
+145	what do you eat each day
+146	how much do you drink
+147	describe the furniture you were lifting
+148	have you been off work
+149	did you feel a sharp pain
+150	did the ibuprofen help
+151	ok then
+152	sounds like
+153	have you been eating
+154	did your doctor prescribe the medicine
+155	what were the pills called
+156	have you noticed pain while urinating
+157	is your job physically demanding
+158	has the pain affected your activity
+159	do you have pain when you are at rest
+160	are you taking any medication for the pain
+161	is the pain dull
+162	does anyone in your family have back pain
+163	what should we do
+164	the doctor will be in
+165	what do you think is the problem
+166	what have you tried for the pain
+167	want to ask about
+168	how frequent is the frequent urination
+169	have you tried any treatment
+170	how long have you had pain
+171	do you have a cause for the pain
+172	when did the frequent urination start
+173	how old are you
+174	what is your goal for this visit
+175	who supports you
+176	have you ever had any serious illnesses
+177	any previous heart problems
+178	have you ever had a sexually transmitted infection
+179	today we have 15 minutes
+180	can you point to the pain
+181	nice to meet you
+182	none
+183	is the pain on one side
+184	are you frustrated
+185	mr.
+186	how much ibuprofen do you take
+187	have you had back injury before
+188	are you exposed to secondhand smoke
+189	do you eat fast food
+190	do you have support
+191	when was the last time you had intercourse
+192	how is your hip
+193	what is your religious preference
+194	i understand completely
+195	has the intensity changed
+196	did you hurt your back
+197	having mood changes
+198	when did you take the ibuprofen
+199	what pills did you take
+200	is this the first time you have had this pain
+201	parents have any medical problems
+202	are you in a relationship
+203	how long have you been married
+204	any other hospitalizations
+205	did you have any trouble finding us
+206	is urination always painful
+207	social history
+208	how did your grandparents die
+209	do you have a weapon
+210	have you ever been dizzy
+211	do you have headaches
+212	has your weight changed
+213	have you noticed any physical changes
+214	do you have any problems with your hip
+215	any chest pain
+216	when was your last bowel movement
+217	do you have any pain in your hip
+218	let me wash my hands
+219	have you ever smoked
+220	have you ever taken any other medication
+221	when were you born
+222	how old are your parents
+223	do you have a history of depression
+224	was the onset of the pain sudden
+225	any otc medication
+226	are your grandparents living
+227	how did grandparents die
+228	do you feel anxious
+229	has the pain become worse or better
+230	family history
+231	how are your children
+232	how long have you been a worker
+233	are you depressed
+234	may i do an exam now
+235	how is your pain now
+236	how have you been handling this
+237	does any position make the pain worse
+238	does it hurt when you bend
+239	when do you have the pain
+240	have you noticed any blood in your urine
+241	appetite
+242	any changes in your diet
+243	have you had any  past bladder problems
+244	do you have problems working
+245	what do you think about the buckeyes
+246	have you ever been in the military
+247	i have all the information i need
+248	is the frequent urination new
+249	does the frequent urination keep you up at night
+250	what else have you tried for the pain
+251	thank you
+252	tell me about your children
+253	were you healthy
+254	discussion is confidential
+255	can you eat
+256	what do you eat
+257	do you drink coffee
+258	mr. wilkins
+259	how much
+260	how long have you been taking the ibuprofen
+261	do you have a family
+262	are you mr. wilkins
+263	where are your children
+264	have you had unprotected sex
+265	i am doctor winslow
+266	i would like to get to know more
+267	what can't you do at work
+268	how frequent is the pain
+269	have you seen anyone else
+270	did you find a parking spot
+271	how much ibuprofen have you taken
+272	do you feel well
+273	are your siblings healthy
+274	have you had frequent urination before
+275	how heavy was the couch
+276	please repeat that
+277	make a follow up appointment
+278	is the pain worse morning or night
+279	is the frequent urination constant
+280	has the frequent urination become worse or better
+281	what makes the frequent urination better
+282	can you do normal activities
+283	do you feel safe
+284	do you feel hopeless
+285	any other sexual partners
+286	are you suicidal
+287	how is your mood
+288	how far did you get in school
+289	has the intensity of the pain changed
+290	any other past sexual partners
+291	has the frequent urination stopped you from doing anything
+292	how did you get here today
+293	does this bother you mentally
+294	tell me more about the saw palmetto
+295	how has the pain changed over time
+296	have you seen a doctor
+297	how has your day been going
+298	what are your allergy reactions
+299	why do you take the medication
+300	were you lifting anything
+301	was the onset sudden
+302	anyone sick at home
+303	what else have you tried for the frequent urination
+304	do your parents have any medical problems
+305	is pain worse when you lie down
+306	how old are your grandparents
+307	can you move your back
+308	does any position relieve the pain
+309	have  you tried ice
+310	can you run
+311	have you been nauseous
+312	do you have relatives
+313	is the frequent urination worse in the morning or at night
+314	do you have any pets
+315	are you sick
+316	when was the last time you saw a doctor
+317	is the frequent urination improving
+318	does your back hurt when you work
+319	when was your last period
+320	have you been off work because of issue
+321	are there any medical conditions that run in your family
+322	does working make your back pain worse
+323	have you been incontinent
+324	do you have any weakness
+325	when did you lift the furniture
+326	did the pain start immediately
+327	was the onset of the frequent urination sudden
+328	what makes the frequent urination worse
+329	have you had a prostate exam
+330	how about your hip
+331	my name is bob
+332	when is the pain most severe
+333	what movements make it hurt
+334	does the pain increase when you stand
+335	how about your bladder
+336	how much sleep
+337	have you tried anything for the frequent urination
+338	are you nervous
+339	does the pain keep you up at night
+340	who prescribed the medicine
+341	are you able to sit
+342	are you able to stand
+343	why supplements
+344	have you ever been pregnant before
+345	does the pain improve with exercise
+346	what was the dose of aspirin
+347	when have you had back pain like this before
+348	do you have a sexually transmitted infection
+349	how often do you take the saw palmetto
+350	do you have frequent urination
+351	when do you have the frequent urination
+352	have you noticed a discharge
+353	have you noticed an itch
+354	have you noticed an odor in your urine
+355	who are your sexual partners
+356	has the pain stopped you from doing anything
+357	are you abused
+358	do you use contraception every time
