@@ -16,7 +16,8 @@ parser = argparse.ArgumentParser(description='CNN text classificer')
 parser.add_argument('-lr', type=float, default=0.001, help='initial learning rate [default: 0.001]')
 parser.add_argument('-epochs', type=int, default=256, help='number of epochs for train [default: 256]')
 parser.add_argument('-batch-size', type=int, default=64, help='batch size for training [default: 64]')
-parser.add_argument('-log-interval',  type=int, default=1,   help='how many steps to wait before logging training status [default: 1]')
+parser.add_argument('-log-interval',  type=int, default=1, help='how many steps to wait before logging training status [default: 1]')
+parser.add_argument('-log-file', type=str, default='result.txt', help='the name of the file to store results')
 parser.add_argument('-test-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
 parser.add_argument('-save-interval', type=int, default=500, help='how many steps to wait before saving [default:500]')
 parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
@@ -38,6 +39,7 @@ parser.add_argument('-snapshot', type=str, default=None, help='filename of model
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
+parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
 args = parser.parse_args()
 
 
@@ -68,12 +70,12 @@ def mr(text_field, label_field, **kargs):
 
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
-    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid) 
+    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
     text_field.build_vocab(train_data, dev_data, test_data)
     label_field.build_vocab(train_data, dev_data, test_data)
-    train_iter, dev_iter, test_iter = data.BucketIterator.splits(
+    train_iter, dev_iter, test_iter = data.Iterator.splits(
                                         (train_data, dev_data, test_data), 
-                                        batch_sizes=(args.batch_size, 
+                                        batch_sizes=(args.batch_size,
                                                      len(dev_data),
                                                      len(test_data)),
                                         **kargs)
@@ -84,7 +86,11 @@ def char_tokenizer(mstring):
 
 
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
-fold_accuracies = []
+print("Logging the results in {}".format(args.log_file))
+log_file = open(args.log_file, 'w')
+char_fold_accuracies = []
+word_fold_accuracies = []
+ensemble_fold_accuracies = []
 orig_save_dir = args.save_dir
 update_args = True
 
@@ -97,42 +103,96 @@ for xfold in range(args.xfolds):
     #train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
     #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
-    text_field = data.Field(lower=True, tokenize=char_tokenizer)
-    label_field = data.Field(sequential=False)
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False)
+    max_kernel_length = max([int(x) for x in args.kernel_sizes.split(',')])
 
-    # update args and print
+    text_field = data.Field(lower=True, tokenize=char_tokenizer)
+    word_field = data.Field(lower=True, fix_length=max_kernel_length)
+
+    label_field = data.Field(sequential=False)
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
+
+
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab) - 1
     args.cuda = args.no_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
         args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
-        args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+        args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
     else:
-        args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-    print("\nParameters:")
+        args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
+    print("\nParameters:", file=log_file)
     for attr, value in sorted(args.__dict__.items()):
-        print("\t{}={}".format(attr.upper(), value))
+        print("\t{}={}".format(attr.upper(), value), file=log_file)
 
 
-    # model
+    # char CNN training and dev
     if args.snapshot is None:
-        cnn = model.CNN_Text(args)
+        char_cnn = model.CNN_Text(args)
     else :
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
-            cnn = torch.load(args.snapshot)
+            char_cnn = torch.load(args.snapshot)
         except :
             print("Sorry, This snapshot doesn't exist."); exit()
-            
 
-    #pdb.set_trace()
-    train.train(train_iter, dev_iter, cnn, args)
-    result = train.eval(test_iter, cnn, args)
-    fold_accuracies.append(result)
-    print("Completed fold {0}. Accuracy: {1}".format(xfold, result))
+    train.train(train_iter, dev_iter, char_cnn, args)
+    result = train.eval(test_iter, char_cnn, args)
+    char_fold_accuracies.append(result)
+    print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result))
+    print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result), file=log_file)
+
+    # Word CNN training and dev
+    args.embed_num = len(word_field.vocab)
+    if update_args==True:
+        # args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
+        args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
+    else:
+        args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
+    # print("\nParameters:")
+    # for attr, value in sorted(args.__dict__.items()):
+    #     print("\t{}={}".format(attr.upper(), value))
+
+    if args.snapshot is None:
+        word_cnn = model.CNN_Text(args)
+    else :
+        print('\nLoading model from [%s]...' % args.snapshot)
+        try:
+            word_cnn = torch.load(args.snapshot)
+        except:
+            print("Sorry, This snapshot doesn't exist."); exit()
+
+    train.train(train_iter_word, dev_iter_word, word_cnn, args)
+    result = train.eval(test_iter_word, word_cnn, args)
+    word_fold_accuracies.append(result)
+    print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result))
+    print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result), file=log_file)
+
+    # Ensemble training and dev
+    if update_args==True:
+        args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
+    else:
+        args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
     update_args = False
 
+    if args.snapshot is None:
+        final_logit = model.SimpleLogistic(args)
+    else :
+        print('\nLoading model from [%s]...' % args.snapshot)
+        try:
+            final_logit = torch.load(args.snapshot)
+        except:
+            print("Sorry, This snapshot doesn't exist."); exit()
+
+    # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False)
+    # train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=-1, repeat=False)
+
+    train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args)
+    result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args)
+    ensemble_fold_accuracies.append(result)
+
+    print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result))
+    print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result), file=log_file)
     """
     # train or predict
     if args.predict is not None:
@@ -148,6 +208,7 @@ for xfold in range(args.xfolds):
         train.train(train_iter, dev_iter, cnn, args)
     """    
 
-average_xfold_accuracy = sum([res for res in fold_accuracies]) / len(fold_accuracies)
-print("folds: {0}".format(len(fold_accuracies)))
+average_xfold_accuracy = sum([res for res in ensemble_fold_accuracies]) / len(ensemble_fold_accuracies)
+print("folds: {0}".format(len(ensemble_fold_accuracies)))
 print("Average cross-fold accuracy: {0}".format(average_xfold_accuracy))
+log_file.close()

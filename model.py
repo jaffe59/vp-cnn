@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import autograd
 
-class  CNN_Text(nn.Module):
+class CNN_Text(nn.Module):
     
     def __init__(self, args):
         super(CNN_Text,self).__init__()
@@ -16,7 +17,7 @@ class  CNN_Text(nn.Module):
         Ks = args.kernel_sizes
 
         self.embed = nn.Embedding(V, D)
-        self.convs1 = [nn.Conv2d(Ci, Co, (K, D)) for K in Ks]
+        self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))
         self.conv14 = nn.Conv2d(Ci, Co, (4, D))
@@ -35,7 +36,7 @@ class  CNN_Text(nn.Module):
         x = self.embed(x) # (N,W,D)
         
         if self.args.static:
-            x = Variable(x)
+            x = autograd.Variable(x)
 
         x = x.unsqueeze(1) # (N,Ci,W,D)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1] #[(N,Co,W), ...]*len(Ks)
@@ -50,3 +51,20 @@ class  CNN_Text(nn.Module):
         x = self.dropout(x) # (N,len(Ks)*Co)
         logit = self.fc1(x) # (N,C)
         return logit
+
+
+class SimpleLogistic(nn.Module):
+    def __init__(self, args):
+        super(SimpleLogistic, self).__init__()
+        self.args = args
+        self.input_size = self.args.class_num * 2
+        self.output_size = self.args.class_num
+        self.layer_num = self.args.layer_num
+        self.layers = nn.ModuleList([nn.Linear(self.input_size, self.input_size) if x < self.layer_num - 1 else
+                       nn.Linear(self.input_size, self.output_size) for x in range(self.layer_num)])
+
+    def forward(self, x1, x2):
+        x = torch.cat((x1, x2), dim=-1)
+        for layer in self.layers:
+            x = layer(x)
+        return x
