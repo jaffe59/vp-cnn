@@ -107,10 +107,19 @@ for xfold in range(args.xfolds):
     word_field = data.Field(lower=True, fix_length=3)
 
     label_field = data.Field(sequential=False)
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False)
-    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False)
+    print('char')
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
 
+    # for x in test_iter:
+    #     print(x.label)
+    #     print('break')
+    print('word')
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
+    # for x in test_iter_word:
+    #     print(x.label)
+    #     break
     # update args and print
+
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab) - 1
     args.cuda = args.no_cuda and torch.cuda.is_available()#; del args.no_cuda
