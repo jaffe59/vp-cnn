@@ -103,8 +103,10 @@ for xfold in range(args.xfolds):
     #train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
     #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
+    max_kernel_length = max([int(x) for x in args.kernel_sizes.split(',')])
+
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
-    word_field = data.Field(lower=True, fix_length=3)
+    word_field = data.Field(lower=True, fix_length=max_kernel_length)
 
     label_field = data.Field(sequential=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
