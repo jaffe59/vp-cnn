@@ -107,18 +107,9 @@ for xfold in range(args.xfolds):
     word_field = data.Field(lower=True, fix_length=3)
 
     label_field = data.Field(sequential=False)
-    print('char')
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
-
-    # for x in test_iter:
-    #     print(x.label)
-    #     print('break')
-    print('word')
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
-    # for x in test_iter_word:
-    #     print(x.label)
-    #     break
-    # update args and print
+
 
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab) - 1
@@ -128,9 +119,9 @@ for xfold in range(args.xfolds):
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
-    # print("\nParameters:")
-    # for attr, value in sorted(args.__dict__.items()):
-    #     print("\t{}={}".format(attr.upper(), value))
+    print("\nParameters:", file=log_file)
+    for attr, value in sorted(args.__dict__.items()):
+        print("\t{}={}".format(attr.upper(), value), file=log_file)
 
 
     # char CNN training and dev
@@ -218,3 +209,4 @@ for xfold in range(args.xfolds):
 average_xfold_accuracy = sum([res for res in ensemble_fold_accuracies]) / len(ensemble_fold_accuracies)
 print("folds: {0}".format(len(ensemble_fold_accuracies)))
 print("Average cross-fold accuracy: {0}".format(average_xfold_accuracy))
+log_file.close()
