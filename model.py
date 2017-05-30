@@ -5,12 +5,15 @@ from torch import autograd
 
 class CNN_Text(nn.Module):
     
-    def __init__(self, args):
+    def __init__(self, args, char_or_word):
         super(CNN_Text,self).__init__()
         self.args = args
         
         V = args.embed_num
-        D = args.embed_dim
+        if char_or_word == 'char':
+            D = args.char_embed_dim
+        else:
+            D = args.word_embed_dim
         C = args.class_num
         Ci = 1
         Co = args.kernel_num
