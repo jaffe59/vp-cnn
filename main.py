@@ -130,7 +130,7 @@ for xfold in range(args.xfolds):
 
     # char CNN training and dev
     if args.snapshot is None:
-        char_cnn = model.CNN_Text(args)
+        char_cnn = model.CNN_Text(args, 'char')
     else :
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
@@ -156,7 +156,7 @@ for xfold in range(args.xfolds):
     #     print("\t{}={}".format(attr.upper(), value))
 
     if args.snapshot is None:
-        word_cnn = model.CNN_Text(args)
+        word_cnn = model.CNN_Text(args, 'word')
     else :
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
