@@ -19,6 +19,8 @@ parser.add_argument('-epochs', type=int, default=256, help='number of epochs for
 parser.add_argument('-batch-size', type=int, default=64, help='batch size for training [default: 64]')
 parser.add_argument('-log-interval',  type=int, default=1, help='how many steps to wait before logging training status [default: 1]')
 parser.add_argument('-log-file', type=str, default='result.txt', help='the name of the file to store results')
+parser.add_argument('-verbose', action='store_true', default=False, help='logging verbose info of training process')
+# parser.add_argument('-verbose-interval', type=int, default=5000, help='steps between two verbose logging')
 parser.add_argument('-test-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
 parser.add_argument('-save-interval', type=int, default=500, help='how many steps to wait before saving [default:500]')
 parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
