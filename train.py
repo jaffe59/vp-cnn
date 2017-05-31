@@ -26,6 +26,10 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             loss.backward()
             optimizer.step()
 
+            # max norm constraint
+            if args.max_norm > 0:
+                model.fc1.weight.data.renorm_(2, 0, args.max_norm)
+
             steps += 1
             if steps % args.log_interval == 0:
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
@@ -210,3 +214,4 @@ def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, 
                                                                            corrects,
                                                                            size), file=kwargs['log_file_handle'])
     return accuracy
+

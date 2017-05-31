@@ -28,7 +28,7 @@ parser.add_argument('-save-dir', type=str, default='snapshot', help='where to sa
 parser.add_argument('-shuffle', action='store_true', default=False, help='shuffle the data every epoch' )
 # model
 parser.add_argument('-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
-parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]')
+parser.add_argument('-max-norm', type=float, default=0.0, help='l2 constraint of parameters [default: 0.0]')
 parser.add_argument('-char-embed-dim', type=int, default=128, help='number of char embedding dimension [default: 128]')
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
@@ -223,7 +223,8 @@ for xfold in range(args.xfolds):
     else :
         print()
         train.train(train_iter, dev_iter, cnn, args)
-    """    
+    """
+    log_file_handle.flush()
 
 average_xfold_accuracy = sum([res for res in ensemble_fold_accuracies]) / len(ensemble_fold_accuracies)
 print("folds: {0}".format(len(ensemble_fold_accuracies)))
