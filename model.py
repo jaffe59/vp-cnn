@@ -44,7 +44,7 @@ class CNN_Text(nn.Module):
         x = self.embed(x) # (N,W,D)
         
         if self.args.static and self.args.word_vector:
-            x = autograd.Variable(x)
+            x = autograd.Variable(x.data)
 
         x = x.unsqueeze(1) # (N,Ci,W,D)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1] #[(N,Co,W), ...]*len(Ks)
