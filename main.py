@@ -138,9 +138,9 @@ for xfold in range(args.xfolds):
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
 
-    print("\nParameters:", file=log_file)
+    print("\nParameters:", file=log_file_handle)
     for attr, value in sorted(args.__dict__.items()):
-        print("\t{}={}".format(attr.upper(), value), file=log_file)
+        print("\t{}={}".format(attr.upper(), value), file=log_file_handle)
 
     # char CNN training and dev
     if args.snapshot is None:
@@ -228,4 +228,4 @@ for xfold in range(args.xfolds):
 average_xfold_accuracy = sum([res for res in ensemble_fold_accuracies]) / len(ensemble_fold_accuracies)
 print("folds: {0}".format(len(ensemble_fold_accuracies)))
 print("Average cross-fold accuracy: {0}".format(average_xfold_accuracy))
-log_file.close()
+log_file_handle.close()
