@@ -5,7 +5,7 @@ from torch import autograd
 
 class CNN_Text(nn.Module):
     
-    def __init__(self, args, char_or_word):
+    def __init__(self, args, char_or_word, vectors=None):
         super(CNN_Text,self).__init__()
         self.args = args
         
@@ -20,6 +20,8 @@ class CNN_Text(nn.Module):
         Ks = args.kernel_sizes
 
         self.embed = nn.Embedding(V, D)
+        if char_or_word != 'char' and vectors:
+            self.embed.weight.data = vectors
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))

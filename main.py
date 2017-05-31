@@ -28,7 +28,7 @@ parser.add_argument('-shuffle', action='store_true', default=False, help='shuffl
 parser.add_argument('-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
 parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]')
 parser.add_argument('-char-embed-dim', type=int, default=128, help='number of char embedding dimension [default: 128]')
-parser.add_argument('-word-embed-dim', type=int, default=128, help='number of word embedding dimension [default: 300]')
+parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
 #parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
 parser.add_argument('-kernel-sizes', type=str, default='3', help='comma-separated kernel size to use for convolution')
@@ -42,7 +42,11 @@ parser.add_argument('-predict', type=str, default=None, help='predict the senten
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
+parser.add_argument('-word-vector', action='store_true', default=False, help="use of glove 6B vector")
 args = parser.parse_args()
+
+if args.word_vector:
+    args.word_vector = 'glove.6B'
 
 
 # load SST dataset
@@ -73,8 +77,8 @@ def mr(text_field, label_field, **kargs):
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
-    text_field.build_vocab(train_data, dev_data, test_data)
-    label_field.build_vocab(train_data, dev_data, test_data)
+    text_field.build_vocab(train_data, dev_data, test_data, **kargs )
+    label_field.build_vocab(train_data, dev_data, test_data )
     train_iter, dev_iter, test_iter = data.Iterator.splits(
                                         (train_data, dev_data, test_data), 
                                         batch_sizes=(args.batch_size,
@@ -110,11 +114,13 @@ for xfold in range(args.xfolds):
     #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
-    word_field = data.Field(lower=True, fix_length=max_kernel_length)
+    word_field = data.Field(lower=True, fix_length=max_kernel_length )
 
     label_field = data.Field(sequential=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
-    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
+                                                        repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
+                                                        wv_dim=args.word_embed_dim)
 
 
     args.embed_num = len(text_field.vocab)
@@ -158,7 +164,7 @@ for xfold in range(args.xfolds):
     #     print("\t{}={}".format(attr.upper(), value))
 
     if args.snapshot is None:
-        word_cnn = model.CNN_Text(args, 'word')
+        word_cnn = model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors)
     else :
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
