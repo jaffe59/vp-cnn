@@ -99,11 +99,9 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
 
             char_feature, char_target = char_batch.text, char_batch.label
             char_feature.data.t_(), char_target.data.sub_(1)  # batch first, index align
-            char_feature.volatile = True
 
             word_feature, word_target = word_batch.text, word_batch.label
             word_feature.data.t_(), word_target.data.sub_(1)  # batch first, index align
-            word_feature.volatile = True
             # print(char_batch.data, word_batch.data)
             if args.cuda:
                 char_feature, char_target = char_feature.cuda(), char_target.cuda()
@@ -115,10 +113,8 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
             char_output = char_model(char_feature)
             word_output = word_model(word_feature)
 
-            char_output.volatile = False
-            word_output.volatile = False
-            char_feature.volatile = False
-            word_feature.volatile = False
+            char_output = autograd.Variable(char_output.data)
+            word_output = autograd.Variable(word_output.data)
 
             optimizer.zero_grad()
             logit = logistic_model(char_output, word_output)
