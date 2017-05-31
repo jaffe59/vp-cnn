@@ -91,6 +91,8 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
 
     steps = 0
     logistic_model.train()
+    char_model.eval()
+    word_model.eval()
     for epoch in range(1, args.epochs+1):
         for char_batch, word_batch in zip(char_train_data,word_train_data):
             # word_batch = next(word_train_data)
@@ -145,6 +147,8 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
 def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, args):
     logistic_model.eval()
     corrects, avg_loss = 0, 0
+    word_model.eval()
+    char_model.eval()
     for char_batch, word_batch in zip(char_data, word_data):
         char_feature, char_target = char_batch.text, char_batch.label
         char_feature.data.t_(), char_target.data.sub_(1)  # batch first, index align

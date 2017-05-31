@@ -102,6 +102,8 @@ for xfold in range(args.xfolds):
     print("Fold {0}".format(xfold))
     # load data
     print("\nLoading data...")
+
+
     #text_field = data.Field(lower=True)
     #label_field = data.Field(sequential=False)
     #train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
@@ -123,10 +125,10 @@ for xfold in range(args.xfolds):
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
+
     print("\nParameters:", file=log_file)
     for attr, value in sorted(args.__dict__.items()):
         print("\t{}={}".format(attr.upper(), value), file=log_file)
-
 
     # char CNN training and dev
     if args.snapshot is None:
