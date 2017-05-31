@@ -103,7 +103,7 @@ ensemble_fold_accuracies = []
 orig_save_dir = args.save_dir
 update_args = True
 
-max_kernel_length = max([int(x) for x in args.kernel_sizes.split(',')])
+max_kernel_length = max([int(x) for x in args.word_kernel_sizes.split(',')])
 
 for xfold in range(args.xfolds):
     print("Fold {0}".format(xfold))
@@ -131,7 +131,7 @@ for xfold in range(args.xfolds):
     args.class_num = len(label_field.vocab) - 1
     args.cuda = args.no_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
-        args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
+        args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
@@ -160,6 +160,7 @@ for xfold in range(args.xfolds):
     args.embed_num = len(word_field.vocab)
     if update_args==True:
         # args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
+        args.word_kernel_sizes = [int(k) for k in args.word_kernel_sizes.split(',')]
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
