@@ -98,8 +98,7 @@ def char_tokenizer(mstring):
 
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
-log_file = open(args.log_file, 'w')
-args.log_file_handle = log_file
+log_file_handle = open(args.log_file, 'w')
 char_fold_accuracies = []
 word_fold_accuracies = []
 ensemble_fold_accuracies = []
@@ -153,11 +152,11 @@ for xfold in range(args.xfolds):
         except :
             print("Sorry, This snapshot doesn't exist."); exit()
 
-    train.train(train_iter, dev_iter, char_cnn, args)
-    result = train.eval(test_iter, char_cnn, args)
+    train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
+    result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
     char_fold_accuracies.append(result)
     print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result))
-    print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result), file=log_file)
+    print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
@@ -180,11 +179,11 @@ for xfold in range(args.xfolds):
         except:
             print("Sorry, This snapshot doesn't exist."); exit()
 
-    train.train(train_iter_word, dev_iter_word, word_cnn, args)
-    result = train.eval(test_iter_word, word_cnn, args)
+    train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+    result = train.eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
     word_fold_accuracies.append(result)
     print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result))
-    print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result), file=log_file)
+    print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result), file=log_file_handle)
 
     # Ensemble training and dev
     if update_args==True:
@@ -205,12 +204,12 @@ for xfold in range(args.xfolds):
     # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False)
     # train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=-1, repeat=False)
 
-    train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args)
-    result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args)
+    train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+    result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
     ensemble_fold_accuracies.append(result)
 
     print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result))
-    print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result), file=log_file)
+    print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result), file=log_file_handle)
     """
     # train or predict
     if args.predict is not None:

@@ -5,7 +5,7 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 
 
-def train(train_iter, dev_iter, model, args):
+def train(train_iter, dev_iter, model, args, **kwargs):
     if args.cuda:
         model.cuda()
 
@@ -45,16 +45,16 @@ def train(train_iter, dev_iter, model, args):
                                                                              loss.data[0],
                                                                              accuracy,
                                                                              corrects,
-                                                                             batch.batch_size), file=args.log_file_handle)
+                                                                             batch.batch_size), file=kwargs['log_file_handle'])
                 eval(dev_iter, model, args)
-            if steps % args.save_interval == 0:
-                if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
-                save_prefix = os.path.join(args.save_dir, 'snapshot')
-                save_path = '{}_steps{}.pt'.format(save_prefix, steps)
-                torch.save(model, save_path)
+            # if steps % args.save_interval == 0:
+            #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
+            #     save_prefix = os.path.join(args.save_dir, 'snapshot')
+            #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
+            #     torch.save(model, save_path)
 
 
-def eval(data_iter, model, args):
+def eval(data_iter, model, args, **kwargs):
     model.eval()
     corrects, avg_loss = 0, 0
     for batch in data_iter:
@@ -71,7 +71,7 @@ def eval(data_iter, model, args):
                      [1].view(target.size()).data == target.data).sum()
 
     size = len(data_iter.dataset)
-    avg_loss = loss.data[0]/size
+    avg_loss = avg_loss/size
     accuracy = corrects/size * 100.0
     model.train()
     print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss, 
@@ -82,7 +82,7 @@ def eval(data_iter, model, args):
         print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
                                                                            accuracy,
                                                                            corrects,
-                                                                           size), file=args.log_file_handle)
+                                                                           size), file=kwargs['log_file_handle'])
     return accuracy
 
 def predict(text, model, text_field, label_feild):
@@ -98,7 +98,7 @@ def predict(text, model, text_field, label_feild):
     _, predicted = torch.max(output, 1)
     return label_feild.vocab.itos[predicted.data[0][0]+1]
 
-def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, logistic_model, args):
+def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs):
     if args.cuda:
         logistic_model.cuda()
     optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
@@ -147,14 +147,23 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
                                                                              corrects,
                                                                              char_batch.batch_size))
             if steps % args.test_interval == 0:
-                eval_logistic(char_dev_data, word_dev_data,char_model, word_model, logistic_model, args)
+                if args.verbose:
+                    corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
+                    accuracy = corrects/batch.batch_size * 100.0
+                    print(
+                    'Batch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps,
+                                                                             loss.data[0],
+                                                                             accuracy,
+                                                                             corrects,
+                                                                             batch.batch_size), file=kwargs['log_file_handle'])
+                    eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args)
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(logistic_model, save_path)
 
-def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, args):
+def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, args, **kwargs):
     logistic_model.eval()
     corrects, avg_loss = 0, 0
     word_model.eval()
@@ -188,11 +197,16 @@ def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, 
                      [1].view(char_target.size()).data == char_target.data).sum()
 
     size = len(char_data.data())
-    avg_loss = loss.data[0] / size
+    avg_loss = avg_loss / size
     accuracy = corrects / size * 100.0
     logistic_model.train()
     print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
                                                                        accuracy,
                                                                        corrects,
                                                                        size))
+    if args.verbose:
+        print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+                                                                           accuracy,
+                                                                           corrects,
+                                                                           size), file=kwargs['log_file_handle'])
     return accuracy
