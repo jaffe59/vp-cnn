@@ -31,7 +31,8 @@ parser.add_argument('-char-embed-dim', type=int, default=128, help='number of ch
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
 #parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
-parser.add_argument('-kernel-sizes', type=str, default='3', help='comma-separated kernel size to use for convolution')
+parser.add_argument('-char-kernel-sizes', type=str, default='3', help='comma-separated kernel size to use for char convolution')
+parser.add_argument('-word-kernel-sizes', type=str, default='1', help='comma-separated kernel size to use for word convolution')
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
 # device
 parser.add_argument('-device', type=int, default=-1, help='device to use for iterate data, -1 mean cpu [default: -1]')
