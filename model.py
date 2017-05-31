@@ -20,7 +20,7 @@ class CNN_Text(nn.Module):
         Ks = args.kernel_sizes
 
         self.embed = nn.Embedding(V, D)
-        if char_or_word != 'char' and vectors:
+        if char_or_word != 'char' and vectors is not None:
             self.embed.weight.data = vectors
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         '''
