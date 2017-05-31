@@ -45,7 +45,7 @@ def train(train_iter, dev_iter, model, args):
                                                                              loss.data[0],
                                                                              accuracy,
                                                                              corrects,
-                                                                             batch.batch_size), file=args.log_file)
+                                                                             batch.batch_size), file=args.log_file_handle)
                 eval(dev_iter, model, args)
             if steps % args.save_interval == 0:
                 if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
@@ -82,7 +82,7 @@ def eval(data_iter, model, args):
         print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
                                                                            accuracy,
                                                                            corrects,
-                                                                           size), file=args.log_file)
+                                                                           size), file=args.log_file_handle)
     return accuracy
 
 def predict(text, model, text_field, label_feild):

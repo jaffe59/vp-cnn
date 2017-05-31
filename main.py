@@ -99,6 +99,7 @@ def char_tokenizer(mstring):
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
 log_file = open(args.log_file, 'w')
+args.log_file_handle = log_file
 char_fold_accuracies = []
 word_fold_accuracies = []
 ensemble_fold_accuracies = []
