@@ -40,7 +40,7 @@ class CNN_Text(nn.Module):
     def forward(self, x):
         x = self.embed(x) # (N,W,D)
         
-        if self.args.static:
+        if self.args.static and self.args.word_vector:
             x = autograd.Variable(x)
 
         x = x.unsqueeze(1) # (N,Ci,W,D)
