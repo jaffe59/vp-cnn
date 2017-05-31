@@ -77,7 +77,7 @@ def mr(text_field, label_field, **kargs):
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
-    text_field.build_vocab(train_data, dev_data, test_data, **kargs )
+    text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"])
     label_field.build_vocab(train_data, dev_data, test_data )
     train_iter, dev_iter, test_iter = data.Iterator.splits(
                                         (train_data, dev_data, test_data), 
@@ -117,7 +117,8 @@ for xfold in range(args.xfolds):
     word_field = data.Field(lower=True, fix_length=max_kernel_length )
 
     label_field = data.Field(sequential=False)
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False)
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
+                                         , wv_type=None, wv_dim=None)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
                                                         repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim)
