@@ -45,11 +45,15 @@ parser.add_argument('-predict', type=str, default=None, help='predict the senten
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
-parser.add_argument('-word-vector', action='store_true', default=False, help="use of glove 6B vector")
+parser.add_argument('-word-vector', type=str, default='', help="use of vectors [default: None. options: 'glove' or 'w2v']")
+parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
 args = parser.parse_args()
 
-if args.word_vector:
+if args.word_vector == 'glove':
     args.word_vector = 'glove.6B'
+elif args.word_vector == 'w2v':
+    if args.word_embed_dim != 300:
+        raise Exception("w2v has no other kind of vectors than 300")
 else: args.word_vector = None
 
 # load SST dataset
@@ -80,10 +84,11 @@ def mr(text_field, label_field, **kargs):
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
-    text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"])
+    text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"])
     label_field.build_vocab(train_data, dev_data, test_data )
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
+    kargs.pop('wv_dir')
     train_iter, dev_iter, test_iter = data.Iterator.splits(
                                         (train_data, dev_data, test_data), 
                                         batch_sizes=(args.batch_size,
@@ -126,7 +131,7 @@ for xfold in range(args.xfolds):
                                          , wv_type=None, wv_dim=None)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
                                                         repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
-                                                        wv_dim=args.word_embed_dim)
+                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path)
 
 
     args.embed_num = len(text_field.vocab)
