@@ -48,7 +48,7 @@ args = parser.parse_args()
 
 if args.word_vector:
     args.word_vector = 'glove.6B'
-
+else: args.word_vector = None
 
 # load SST dataset
 def sst(text_field, label_field,  **kargs):
