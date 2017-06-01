@@ -128,7 +128,7 @@ for xfold in range(args.xfolds):
 
     label_field = data.Field(sequential=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
-                                         , wv_type=None, wv_dim=None)
+                                         , wv_type=None, wv_dim=None, wv_dir=None)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
                                                         repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path)
