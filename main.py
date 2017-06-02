@@ -19,7 +19,7 @@ parser.add_argument('-l2', type=float, default=1e-6, help='l2 regularization str
 parser.add_argument('-epochs', type=int, default=256, help='number of epochs for train [default: 256]')
 parser.add_argument('-batch-size', type=int, default=64, help='batch size for training [default: 64]')
 parser.add_argument('-log-interval',  type=int, default=1, help='how many steps to wait before logging training status [default: 1]')
-parser.add_argument('-log-file', type=str, default='result.txt', help='the name of the file to store results')
+parser.add_argument('-log-file', type=str, default= datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+'result.txt', help='the name of the file to store results')
 parser.add_argument('-verbose', action='store_true', default=False, help='logging verbose info of training process')
 # parser.add_argument('-verbose-interval', type=int, default=5000, help='steps between two verbose logging')
 parser.add_argument('-test-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
