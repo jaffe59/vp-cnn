@@ -17,8 +17,8 @@ def train(train_iter, dev_iter, model, args, **kwargs):
         for batch in train_iter:
             feature, target = batch.text, batch.label
             feature.data.t_(), target.data.sub_(1)  # batch first, index align
-            print(feature)
-            print(train_iter.data().fields['text'].vocab.stoi)
+            # print(feature)
+            # print(train_iter.data().fields['text'].vocab.stoi)
             if args.cuda:
                 feature, target = feature.cuda(), target.cuda()
 
