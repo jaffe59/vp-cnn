@@ -150,22 +150,22 @@ for xfold in range(args.xfolds):
     for attr, value in sorted(args.__dict__.items()):
         print("\t{}={}".format(attr.upper(), value), file=log_file_handle)
 
-    # char CNN training and dev
-    if args.snapshot is None:
-        char_cnn = model.CNN_Text(args, 'char')
-    else :
-        print('\nLoading model from [%s]...' % args.snapshot)
-        try:
-            char_cnn = torch.load(args.snapshot)
-        except :
-            print("Sorry, This snapshot doesn't exist."); exit()
-
-    train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
-    if args.eval_on_test:
-        result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
-        char_fold_accuracies.append(result)
-        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
-        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
+    # # char CNN training and dev
+    # if args.snapshot is None:
+    #     char_cnn = model.CNN_Text(args, 'char')
+    # else :
+    #     print('\nLoading model from [%s]...' % args.snapshot)
+    #     try:
+    #         char_cnn = torch.load(args.snapshot)
+    #     except :
+    #         print("Sorry, This snapshot doesn't exist."); exit()
+    #
+    # train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
+    # if args.eval_on_test:
+    #     result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
+    #     char_fold_accuracies.append(result)
+    #     print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
+    #     print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
@@ -175,9 +175,7 @@ for xfold in range(args.xfolds):
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
-    # print("\nParameters:")
-    # for attr, value in sorted(args.__dict__.items()):
-    #     print("\t{}={}".format(attr.upper(), value))
+
 
     if args.snapshot is None:
         word_cnn = model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors)
