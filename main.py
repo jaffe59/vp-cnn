@@ -47,6 +47,7 @@ parser.add_argument('-xfolds', type=int, default=10, help='number of folds for c
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
 parser.add_argument('-word-vector', type=str, default='', help="use of vectors [default: None. options: 'glove' or 'w2v']")
 parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
+parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
 args = parser.parse_args()
 
 if args.word_vector == 'glove':
@@ -84,11 +85,12 @@ def mr(text_field, label_field, **kargs):
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
-    text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"])
-    label_field.build_vocab(train_data, dev_data, test_data )
+    text_field.build_vocab(train_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
+    label_field.build_vocab(train_data)
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
     kargs.pop('wv_dir')
+    kargs.pop("min_freq")
     train_iter, dev_iter, test_iter = data.Iterator.splits(
                                         (train_data, dev_data, test_data), 
                                         batch_sizes=(args.batch_size,
@@ -131,7 +133,7 @@ for xfold in range(args.xfolds):
                                          , wv_type=None, wv_dim=None, wv_dir=None)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
                                                         repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
-                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path)
+                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
 
     args.embed_num = len(text_field.vocab)
