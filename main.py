@@ -113,7 +113,7 @@ ensemble_fold_accuracies = []
 orig_save_dir = args.save_dir
 update_args = True
 
-max_kernel_length = max([int(x) for x in args.word_kernel_sizes.split(',')])
+# max_kernel_length = max([int(x) for x in args.word_kernel_sizes.split(',')])
 
 for xfold in range(args.xfolds):
     print("Fold {0}".format(xfold))
@@ -127,7 +127,7 @@ for xfold in range(args.xfolds):
     #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
-    word_field = data.Field(lower=True, fix_length=max_kernel_length )
+    word_field = data.Field(lower=True )
 
     label_field = data.Field(sequential=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
