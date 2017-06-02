@@ -112,17 +112,24 @@ def predict(text, model, text_field, label_feild):
 def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs):
     if args.cuda:
         logistic_model.cuda()
-    if args.optimizer == 'adam':
-        optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
-    elif args.optimizer == 'sgd':
-        optimizer = torch.optim.SGD(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+    if not args.fine_tune:
+        if args.optimizer == 'adam':
+            optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+        elif args.optimizer == 'sgd':
+            optimizer = torch.optim.SGD(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+        else:
+            raise Exception("bad optimizer!")
     else:
-        raise Exception("bad optimizer!")
+        char_cnn_params = {'params':char_model.parameters(), 'lr':args.lr * 1e-3}
+        word_cnn_params = {'params':word_model.parameters(), 'lr':args.lr * 1e-3}
+        logistic_params = {'params':logistic_model.parameters()}
+        optimizer = torch.optim.SGD([char_cnn_params, word_cnn_params, logistic_params], lr=args.lr)
 
     steps = 0
     logistic_model.train()
-    char_model.eval()
-    word_model.eval()
+    if not args.fine_tune:
+        char_model.eval()
+        word_model.eval()
     for epoch in range(1, args.epochs+1):
         for char_batch, word_batch in zip(char_train_data,word_train_data):
             # word_batch = next(word_train_data)
@@ -143,8 +150,9 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
             char_output = char_model(char_feature)
             word_output = word_model(word_feature)
 
-            char_output = autograd.Variable(char_output.data)
-            word_output = autograd.Variable(word_output.data)
+            if not args.fine_tune:
+                char_output = autograd.Variable(char_output.data)
+                word_output = autograd.Variable(word_output.data)
 
             optimizer.zero_grad()
             logit = logistic_model(char_output, word_output)
