@@ -8,8 +8,12 @@ import torch.nn.functional as F
 def train(train_iter, dev_iter, model, args, **kwargs):
     if args.cuda:
         model.cuda()
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    if args.optimizer == 'adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    elif args.optimizer == 'sgd':
+        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    else:
+        raise Exception("bad optimizer!")
 
     steps = 0
     model.train()
@@ -108,7 +112,12 @@ def predict(text, model, text_field, label_feild):
 def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs):
     if args.cuda:
         logistic_model.cuda()
-    optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+    if args.optimizer == 'adam':
+        optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+    elif args.optimizer == 'sgd':
+        optimizer = torch.optim.SGD(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+    else:
+        raise Exception("bad optimizer!")
 
     steps = 0
     logistic_model.train()

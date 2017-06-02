@@ -50,6 +50,7 @@ parser.add_argument('-layer-num', type=int, default=2, help='the number of layer
 parser.add_argument('-word-vector', type=str, default='', help="use of vectors [default: None. options: 'glove' or 'w2v']")
 parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
+parser.add_argument('-optimizer', type=str, default='sgd', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam']")
 args = parser.parse_args()
 
 if args.word_vector == 'glove':
