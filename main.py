@@ -22,6 +22,7 @@ parser.add_argument('-log-file', type=str, default='result.txt', help='the name 
 parser.add_argument('-verbose', action='store_true', default=False, help='logging verbose info of training process')
 # parser.add_argument('-verbose-interval', type=int, default=5000, help='steps between two verbose logging')
 parser.add_argument('-test-interval', type=int, default=100, help='how many steps to wait before testing [default: 100]')
+parser.add_argument('-eval-on-test', action='store_true', default=False, help='run evaluation on test data?')
 parser.add_argument('-save-interval', type=int, default=500, help='how many steps to wait before saving [default:500]')
 parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
 # data 
@@ -38,7 +39,7 @@ parser.add_argument('-word-kernel-sizes', type=str, default='1', help='comma-sep
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
 # device
 parser.add_argument('-device', type=int, default=-1, help='device to use for iterate data, -1 mean cpu [default: -1]')
-parser.add_argument('-no-cuda', action='store_true', default=False, help='disable the gpu' )
+parser.add_argument('-yes-cuda', action='store_true', default=False, help='disable the gpu' )
 # option
 parser.add_argument('-snapshot', type=str, default=None, help='filename of model snapshot [default: None]')
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
@@ -138,7 +139,7 @@ for xfold in range(args.xfolds):
 
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab) - 1
-    args.cuda = args.no_cuda and torch.cuda.is_available()#; del args.no_cuda
+    args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
         args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
@@ -160,10 +161,11 @@ for xfold in range(args.xfolds):
             print("Sorry, This snapshot doesn't exist."); exit()
 
     train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
-    result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
-    char_fold_accuracies.append(result)
-    print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result))
-    print("Completed fold {0}. Accuracy: {1} for CHAR".format(xfold, result), file=log_file_handle)
+    if args.eval_on_test:
+        result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
+        char_fold_accuracies.append(result)
+        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
+        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
@@ -187,10 +189,11 @@ for xfold in range(args.xfolds):
             print("Sorry, This snapshot doesn't exist."); exit()
 
     train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
-    result = train.eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
-    word_fold_accuracies.append(result)
-    print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result))
-    print("Completed fold {0}. Accuracy: {1} for WORD".format(xfold, result), file=log_file_handle)
+    if args.eval_on_test:
+        result = train.eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+        word_fold_accuracies.append(result)
+        print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result))
+        print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result), file=log_file_handle)
 
     # Ensemble training and dev
     if update_args==True:
@@ -212,11 +215,12 @@ for xfold in range(args.xfolds):
     # train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=-1, repeat=False)
 
     train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
-    result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
-    ensemble_fold_accuracies.append(result)
+    if args.eval_on_test:
+        result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+        ensemble_fold_accuracies.append(result)
 
-    print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result))
-    print("Completed fold {0}. Accuracy: {1} for LOGIT".format(xfold, result), file=log_file_handle)
+        print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
+        print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result), file=log_file_handle)
     """
     # train or predict
     if args.predict is not None:

@@ -160,7 +160,7 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
                                                                              accuracy,
                                                                              corrects,
                                                                            char_batch.batch_size), file=kwargs['log_file_handle'])
-                    eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs)
+                eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs)
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
