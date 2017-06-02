@@ -84,6 +84,7 @@ def mr(text_field, label_field, **kargs):
                                 **kargs)
     return train_iter, dev_iter
 
+
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
