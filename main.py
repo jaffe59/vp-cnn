@@ -10,6 +10,7 @@ import train
 import mydatasets
 import pdb
 import vpdataset
+import numpy as np
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
@@ -86,7 +87,7 @@ def mr(text_field, label_field, **kargs):
 #load VP dataset
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
-    text_field.build_vocab(train_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
+    text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
     label_field.build_vocab(train_data, dev_data, test_data)
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
@@ -107,9 +108,12 @@ def char_tokenizer(mstring):
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
 log_file_handle = open(args.log_file, 'w')
-char_fold_accuracies = []
-word_fold_accuracies = []
-ensemble_fold_accuracies = []
+char_dev_fold_accuracies = []
+word_dev_fold_accuracies = []
+ensemble_dev_fold_accuracies = []
+char_test_fold_accuracies = []
+word_test_fold_accuracies = []
+ensemble_test_fold_accuracies = []
 orig_save_dir = args.save_dir
 update_args = True
 
@@ -150,22 +154,23 @@ for xfold in range(args.xfolds):
     for attr, value in sorted(args.__dict__.items()):
         print("\t{}={}".format(attr.upper(), value), file=log_file_handle)
 
-    # # char CNN training and dev
-    # if args.snapshot is None:
-    #     char_cnn = model.CNN_Text(args, 'char')
-    # else :
-    #     print('\nLoading model from [%s]...' % args.snapshot)
-    #     try:
-    #         char_cnn = torch.load(args.snapshot)
-    #     except :
-    #         print("Sorry, This snapshot doesn't exist."); exit()
-    #
-    # train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
-    # if args.eval_on_test:
-    #     result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
-    #     char_fold_accuracies.append(result)
-    #     print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
-    #     print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
+    # char CNN training and dev
+    if args.snapshot is None:
+        char_cnn = model.CNN_Text(args, 'char')
+    else :
+        print('\nLoading model from [%s]...' % args.snapshot)
+        try:
+            char_cnn = torch.load(args.snapshot)
+        except :
+            print("Sorry, This snapshot doesn't exist."); exit()
+
+    acc = train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
+    char_dev_fold_accuracies.append(acc)
+    if args.eval_on_test:
+        result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
+        char_test_fold_accuracies.append(result)
+        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
+        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
@@ -186,10 +191,11 @@ for xfold in range(args.xfolds):
         except:
             print("Sorry, This snapshot doesn't exist."); exit()
 
-    train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+    acc = train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+    word_dev_fold_accuracies.append(acc)
     if args.eval_on_test:
         result = train.eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
-        word_fold_accuracies.append(result)
+        word_test_fold_accuracies.append(result)
         print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result))
         print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result), file=log_file_handle)
 
@@ -212,10 +218,11 @@ for xfold in range(args.xfolds):
     # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False)
     # train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=-1, repeat=False)
 
-    train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+    acc = train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+    ensemble_dev_fold_accuracies.append(acc)
     if args.eval_on_test:
         result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
-        ensemble_fold_accuracies.append(result)
+        ensemble_test_fold_accuracies.append(result)
 
         print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
         print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result), file=log_file_handle)
@@ -235,7 +242,20 @@ for xfold in range(args.xfolds):
     """
     log_file_handle.flush()
 
-average_xfold_accuracy = sum([res for res in ensemble_fold_accuracies]) / len(ensemble_fold_accuracies)
-print("folds: {0}".format(len(ensemble_fold_accuracies)))
-print("Average cross-fold accuracy: {0}".format(average_xfold_accuracy))
+print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_dev_fold_accuracies), np.std(char_dev_fold_accuracies)))
+print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)))
+print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)))
+if char_test_fold_accuracies:
+    print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_dev_fold_accuracies), np.std(char_dev_fold_accuracies)), file=log_file_handle)
+    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)), file=log_file_handle)
+    print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)), file=log_file_handle)
+
+print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)))
+print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies), np.std(word_test_fold_accuracies)))
+print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)))
+if char_test_fold_accuracies:
+    print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)), file=log_file_handle)
+    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies), np.std(word_test_fold_accuracies)), file=log_file_handle)
+    print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
+
 log_file_handle.close()

@@ -58,7 +58,8 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(model, save_path)
-
+    acc = eval(dev_iter, model, args, **kwargs)
+    return acc
 
 def eval(data_iter, model, args, **kwargs):
     model.eval()
@@ -168,6 +169,8 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(logistic_model, save_path)
+    acc = eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs)
+    return acc
 
 def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, args, **kwargs):
     logistic_model.eval()
