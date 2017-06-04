@@ -13,7 +13,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
     elif args.optimizer == 'sgd':
         optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.l2)
     elif args.optimizer == 'adadelta':
-        optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.l2, rho=0.95)
+        optimizer = torch.optim.Adadelta(model.parameters(), rho=0.95)
     else:
         raise Exception("bad optimizer!")
 
