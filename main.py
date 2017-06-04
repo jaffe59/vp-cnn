@@ -145,7 +145,7 @@ for xfold in range(args.xfolds):
                                                         repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
-
+    print(word_field.vocab.itos[100])
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab)
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda

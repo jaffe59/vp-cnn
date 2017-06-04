@@ -25,6 +25,7 @@ class CNN_Text(nn.Module):
         self.embed = nn.Embedding(V, D)
         if char_or_word != 'char' and vectors is not None:
             self.embed.weight.data = vectors
+        print(self.embed.weight.data[100])
         print(self.embed.weight.data.size())
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         '''
