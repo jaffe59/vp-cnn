@@ -113,5 +113,5 @@ def clean_str(string):
   return pad2(string.strip().lower().split(" "))
 
 def pad2(x):
-    x = ['<pad>', '<pad>'] + x + ['<pad>', '<pad>']
+    x = ['<pad>', '<pad>', '<pad>', '<pad>'] + x
     return x
