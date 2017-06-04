@@ -12,6 +12,8 @@ def train(train_iter, dev_iter, model, args, **kwargs):
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     elif args.optimizer == 'sgd':
         optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    elif args.optimizer == 'adadelta':
+        optimizer = torch.optim.Adadelta(model.parameters(), lr=args.lr, weight_decay=args.l2, rho=0.95)
     else:
         raise Exception("bad optimizer!")
 
@@ -117,6 +119,8 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
             optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
         elif args.optimizer == 'sgd':
             optimizer = torch.optim.SGD(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+        elif args.optimizer == 'adadelta':
+            optimizer = torch.optim.Adadelta(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2, rho=0.95)
         else:
             raise Exception("bad optimizer!")
     else:
