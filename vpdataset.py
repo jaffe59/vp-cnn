@@ -3,6 +3,7 @@ import os
 import pdb
 import random
 import math
+import re
 
 class VP(data.Dataset):
     """modeled after Shawn1993 github user's Pytorch implementation of Kim2014 - cnn for text categorization"""
@@ -34,7 +35,7 @@ class VP(data.Dataset):
                     lines = f.readlines()
                     #pdb.set_trace()
                     examples += [
-                        data.Example.fromlist([line.split("\t")[1], line.split("\t")[0]], fields) for line in lines] #in f]
+                        data.Example.fromlist([clean_str(line.split("\t")[1]), line.split("\t")[0]], fields) for line in lines] #in f]
                     #assume "target \t source", one instance per line
         # print(examples[0].text)
         super(VP, self).__init__(examples, fields, **kwargs)
@@ -87,3 +88,23 @@ class VP(data.Dataset):
             return (cls(text_field, label_field, examples=traindev[:dev_index]),
                     cls(text_field, label_field, examples=traindev[dev_index:]),
                     cls(text_field, label_field, examples=test))
+
+def clean_str(string):
+  """
+  Tokenization/string cleaning for all datasets except for SST.
+  """
+  string = re.sub("[^A-Za-z0-9(),!?\'\`]", " ", string)
+  string = re.sub("\'s", " \'s", string)
+  string = re.sub("\'m", " \'m", string)
+  string = re.sub("\'ve", " \'ve", string)
+  string = re.sub("n\'t", " n\'t", string)
+  string = re.sub("\'re", " \'re", string)
+  string = re.sub("\'d", " \'d", string)
+  string = re.sub("\'ll", " \'ll", string)
+  string = re.sub(",", " , ", string)
+  string = re.sub("!", " ! ", string)
+  string = re.sub("\(", " ( ", string)
+  string = re.sub("\)", " ) ", string)
+  string = re.sub("\?", " ? ", string)
+  string = re.sub("\s{2,}", " ", string)
+  return string.strip().lower()
