@@ -108,6 +108,7 @@ def char_tokenizer(mstring):
     return list(mstring)
 
 def pad2(x):
+    print(x)
     x = ['<pad>', '<pad>'] + x + ['<pad>', '<pad>']
     return x
 
