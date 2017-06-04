@@ -36,9 +36,7 @@ class VP(data.Dataset):
                     #pdb.set_trace()
                     for line in lines:
                         label, text = line.split("\t")
-                        print(label, text)
                         this_example = data.Example.fromlist([text, label], fields)
-                        print(this_example.text)
                         examples += [this_example]
 
                     #assume "target \t source", one instance per line
@@ -98,7 +96,6 @@ def clean_str(string):
   """
   Tokenization/string cleaning for all datasets except for SST.
   """
-  print(string)
   string = re.sub("[^A-Za-z0-9(),!?\'\`]", " ", string)
   string = re.sub("\'s", " \'s", string)
   string = re.sub("\'m", " \'m", string)
@@ -116,6 +113,5 @@ def clean_str(string):
   return pad2(string.strip().lower().split(" "))
 
 def pad2(x):
-    print(x)
     x = ['<pad>', '<pad>'] + x + ['<pad>', '<pad>']
     return x
