@@ -107,6 +107,17 @@ def vp(text_field, label_field, foldid, **kargs):
 def char_tokenizer(mstring):
     return list(mstring)
 
+def check_vocab(field):
+    itos = field.vocab.itos
+    other_vocab = set()
+    filename = '../sent-conv-torch/custom_word_mapping.txt'
+    f = open(filename)
+    for line in f:
+        line = line.strip().split(" ")
+        other_vocab.add(line[0])
+    for word in itos:
+        if word not in other_vocab:
+            print(word)
 
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
@@ -145,7 +156,9 @@ for xfold in range(args.xfolds):
                                                         repeat=False, shuffle=False, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
-    print(word_field.vocab.itos[100])
+    check_vocab(word_field)
+
+
     args.embed_num = len(text_field.vocab)
     args.class_num = len(label_field.vocab)
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
