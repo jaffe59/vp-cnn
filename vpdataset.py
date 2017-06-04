@@ -37,7 +37,6 @@ class VP(data.Dataset):
                         data.Example.fromlist([line.split("\t")[1], line.split("\t")[0]], fields) for line in lines] #in f]
                     #assume "target \t source", one instance per line
         # print(examples[0].text)
-        random.shuffle(examples)
         super(VP, self).__init__(examples, fields, **kwargs)
         
 
