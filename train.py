@@ -3,7 +3,7 @@ import sys
 import torch
 import torch.autograd as autograd
 import torch.nn.functional as F
-
+import copy
 
 def train(train_iter, dev_iter, model, args, **kwargs):
     if args.cuda:
@@ -19,6 +19,8 @@ def train(train_iter, dev_iter, model, args, **kwargs):
 
     steps = 0
     model.train()
+    best_acc = 0
+    best_model = None
     for epoch in range(1, args.epochs+1):
         for batch in train_iter:
             feature, target = batch.text, batch.label
@@ -58,14 +60,18 @@ def train(train_iter, dev_iter, model, args, **kwargs):
                                                                              accuracy,
                                                                              corrects,
                                                                              batch.batch_size), file=kwargs['log_file_handle'])
-                eval(dev_iter, model, args, **kwargs)
+        acc = eval(dev_iter, model, args, **kwargs)
+        if acc > best_acc:
+            best_acc = acc
+            best_model = copy.deepcopy(model)
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(model, save_path)
+    model = best_model
     acc = eval(dev_iter, model, args, **kwargs)
-    return acc
+    return acc, model
 
 def eval(data_iter, model, args, **kwargs):
     model.eval()

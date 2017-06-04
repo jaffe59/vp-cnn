@@ -195,7 +195,7 @@ for xfold in range(args.xfolds):
         except:
             print("Sorry, This snapshot doesn't exist."); exit()
 
-    acc = train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+    acc, word_cnn = train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
     word_dev_fold_accuracies.append(acc)
     print("Completed fold {0}. Accuracy on Dev: {1} for WORD".format(xfold, acc), file=log_file_handle)
     if args.eval_on_test:
