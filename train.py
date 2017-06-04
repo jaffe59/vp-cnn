@@ -64,6 +64,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
         if acc > best_acc:
             best_acc = acc
             best_model = copy.deepcopy(model)
+        print(model.embed.weight[100])
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
