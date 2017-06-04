@@ -118,6 +118,10 @@ def check_vocab(field):
     for word in itos:
         if word not in other_vocab:
             print(word)
+    print('------')
+    for word in other_vocab:
+        if word not in itos:
+            print(word)
 
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
