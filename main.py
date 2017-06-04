@@ -139,10 +139,9 @@ for xfold in range(args.xfolds):
     #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
     tokenizer = data.Pipeline(vpdataset.clean_str)
-    tokenizer.add_after(data.Pipeline(pad2))
 
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
-    word_field = data.Field(lower=True, preprocessing=tokenizer)
+    word_field = data.Field(lower=True, tokenize=tokenizer, preprocessing=data.Pipeline(pad2))
 
     label_field = data.Field(sequential=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
