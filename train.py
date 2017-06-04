@@ -29,6 +29,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             # print(train_iter.data().fields['text'].vocab.stoi)
             if args.cuda:
                 feature, target = feature.cuda(), target.cuda()
+            assert feature.volatile is False and target.volatile is False
             # print(feature, target)
             optimizer.zero_grad()
             logit = model(feature)
@@ -37,8 +38,8 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             optimizer.step()
 
             # max norm constraint
-            # if args.max_norm > 0:
-            #     model.fc1.weight.data.renorm_(2, 0, args.max_norm)
+            if args.max_norm > 0:
+                model.fc1.weight.data.renorm_(2, 0, args.max_norm)
 
             steps += 1
             if steps % args.log_interval == 0:
