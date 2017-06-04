@@ -87,7 +87,7 @@ class VP(data.Dataset):
 
             #test will be entire held out section (foldid)
             test = folds[foldid]
-
+            print(len(traindev[:dev_index]))
             return (cls(text_field, label_field, examples=traindev[:dev_index]),
                     cls(text_field, label_field, examples=traindev[dev_index:]),
                     cls(text_field, label_field, examples=test))
