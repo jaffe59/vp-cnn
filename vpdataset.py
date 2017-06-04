@@ -93,6 +93,7 @@ def clean_str(string):
   """
   Tokenization/string cleaning for all datasets except for SST.
   """
+  print(string)
   string = re.sub("[^A-Za-z0-9(),!?\'\`]", " ", string)
   string = re.sub("\'s", " \'s", string)
   string = re.sub("\'m", " \'m", string)
