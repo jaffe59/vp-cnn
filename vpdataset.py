@@ -113,4 +113,9 @@ def clean_str(string):
   string = re.sub("\)", " ) ", string)
   string = re.sub("\?", " ? ", string)
   string = re.sub("\s{2,}", " ", string)
-  return string.strip().lower().split(" ")
+  return pad2(string.strip().lower().split(" "))
+
+def pad2(x):
+    print(x)
+    x = ['<pad>', '<pad>'] + x + ['<pad>', '<pad>']
+    return x
