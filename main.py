@@ -107,6 +107,10 @@ def vp(text_field, label_field, foldid, **kargs):
 def char_tokenizer(mstring):
     return list(mstring)
 
+def pad2(x):
+    x = ['<pad>', '<pad>'] + x + ['<pad>', '<pad>']
+    return x
+
 
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
@@ -134,7 +138,7 @@ for xfold in range(args.xfolds):
     #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
-    word_field = data.Field(lower=True )
+    word_field = data.Field(lower=True, tokenize=vpdataset.clean_str, preprocessing=data.Pipeline(pad2))
 
     label_field = data.Field(sequential=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False

@@ -35,7 +35,7 @@ class VP(data.Dataset):
                     lines = f.readlines()
                     #pdb.set_trace()
                     examples += [
-                        data.Example.fromlist([clean_str(line.split("\t")[1]), line.split("\t")[0]], fields) for line in lines] #in f]
+                        data.Example.fromlist([line.split("\t")[1], line.split("\t")[0]], fields) for line in lines] #in f]
                     #assume "target \t source", one instance per line
         # print(examples[0].text)
         super(VP, self).__init__(examples, fields, **kwargs)
@@ -107,4 +107,4 @@ def clean_str(string):
   string = re.sub("\)", " ) ", string)
   string = re.sub("\?", " ? ", string)
   string = re.sub("\s{2,}", " ", string)
-  return string.strip().lower()
+  return string.strip().lower().split(" ")
