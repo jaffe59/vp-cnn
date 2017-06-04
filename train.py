@@ -29,7 +29,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             # print(train_iter.data().fields['text'].vocab.stoi)
             if args.cuda:
                 feature, target = feature.cuda(), target.cuda()
-            print(feature, target)
+            # print(feature, target)
             optimizer.zero_grad()
             logit = model(feature)
             loss = F.cross_entropy(logit, target)
@@ -64,7 +64,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
         if acc > best_acc:
             best_acc = acc
             best_model = copy.deepcopy(model)
-        print(model.embed.weight[100])
+        # print(model.embed.weight[100])
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')

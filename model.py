@@ -22,7 +22,7 @@ class CNN_Text(nn.Module):
         else:
             Ks = args.word_kernel_sizes
 
-        self.embed = nn.Embedding(V, D)
+        self.embed = nn.Embedding(V, D, padding_idx=1)
         if char_or_word != 'char' and vectors is not None:
             self.embed.weight.data = vectors
         # print(self.embed.weight.data[100])
