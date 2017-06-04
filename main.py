@@ -165,7 +165,7 @@ for xfold in range(args.xfolds):
 
 
     args.embed_num = len(text_field.vocab)
-    args.class_num = len(label_field.vocab)
+    args.class_num = len(label_field.vocab) - 1
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
         args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]

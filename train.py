@@ -29,7 +29,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             # print(train_iter.data().fields['text'].vocab.stoi)
             if args.cuda:
                 feature, target = feature.cuda(), target.cuda()
-
+            print(feature.size(), target.size())
             optimizer.zero_grad()
             logit = model(feature)
             loss = F.cross_entropy(logit, target)
