@@ -92,7 +92,6 @@ def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
     text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
     label_field.build_vocab(train_data, dev_data, test_data)
-    print(label_field.vocab.stoi)
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
     kargs.pop('wv_dir')
@@ -148,7 +147,7 @@ for xfold in range(args.xfolds):
 
 
     args.embed_num = len(text_field.vocab)
-    args.class_num = len(label_field.vocab) - 1
+    args.class_num = len(label_field.vocab)
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
         args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
