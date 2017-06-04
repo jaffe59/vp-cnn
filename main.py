@@ -108,7 +108,7 @@ def char_tokenizer(mstring):
     return list(mstring)
 
 def inttolist(integer):
-    return[int(integer)]
+    return[int(i) for i in integer]
 
 def check_vocab(field):
     itos = field.vocab.itos
