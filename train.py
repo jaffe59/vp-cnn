@@ -32,7 +32,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
             # print(feature, target)
             optimizer.zero_grad()
             logit = model(feature)
-            loss = F.cross_entropy(logit, target)
+            loss = F.nll_loss(logit, target)
             loss.backward()
             optimizer.step()
 
