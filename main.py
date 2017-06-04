@@ -161,11 +161,12 @@ for xfold in range(args.xfolds):
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
     check_vocab(word_field)
-    print(label_field.vocab.itos)
+    # print(label_field.vocab.itos)
 
 
     args.embed_num = len(text_field.vocab)
-    args.class_num = len(label_field.vocab) - 1
+    # args.class_num = len(label_field.vocab) - 1
+    args.class_num = 359
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
         args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
