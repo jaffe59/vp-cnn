@@ -35,6 +35,7 @@ class CNN_Text(nn.Module):
         '''
         self.dropout = nn.Dropout(args.dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, C)
+        print(V, D, C, Ci, Co, Ks, self.convs1, self.fc1)
 
     def conv_and_pool(self, x, conv):
         x = F.relu(conv(x)).squeeze(3) #(N,Co,W)
