@@ -91,7 +91,7 @@ def mr(text_field, label_field, **kargs):
 def vp(text_field, label_field, foldid, **kargs):
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
     text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
-    label_field.build_vocab(train_data, dev_data, test_data)
+    # label_field.build_vocab(train_data, dev_data, test_data)
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
     kargs.pop('wv_dir')
@@ -153,7 +153,7 @@ for xfold in range(args.xfolds):
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
     word_field = data.Field(lower=True, tokenize=tokenizer)
 
-    label_field = data.Field(sequential=False)
+    label_field = data.Field(sequential=False, use_vocab=False)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
