@@ -209,7 +209,7 @@ for xfold in range(args.xfolds):
     #     args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
     # else:
     #     args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
-    # update_args = False
+    update_args = False
     #
     # if args.snapshot is None:
     #     final_logit = model.SimpleLogistic(args)
