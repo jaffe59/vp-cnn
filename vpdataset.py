@@ -34,8 +34,12 @@ class VP(data.Dataset):
                 with open(os.path.join(path, self.filename)) as f:
                     lines = f.readlines()
                     #pdb.set_trace()
-                    examples += [
-                        data.Example.fromlist([line.split("\t")[1], line.split("\t")[0]], fields) for line in lines] #in f]
+                    for line in lines:
+                        label, text = line.split("\t")
+                        print(label, text)
+                        this_example = data.Example.fromlist([text, label], fields)
+                        examples += [this_example]
+
                     #assume "target \t source", one instance per line
         # print(examples[0].text)
         super(VP, self).__init__(examples, fields, **kwargs)
