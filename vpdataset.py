@@ -38,6 +38,7 @@ class VP(data.Dataset):
                         label, text = line.split("\t")
                         print(label, text)
                         this_example = data.Example.fromlist([text, label], fields)
+                        print(this_example.text)
                         examples += [this_example]
 
                     #assume "target \t source", one instance per line
