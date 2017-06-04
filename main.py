@@ -107,6 +107,9 @@ def vp(text_field, label_field, foldid, **kargs):
 def char_tokenizer(mstring):
     return list(mstring)
 
+def inttolist(integer):
+    return[int(integer)]
+
 def check_vocab(field):
     itos = field.vocab.itos
     other_vocab = set()
@@ -153,8 +156,7 @@ for xfold in range(args.xfolds):
     text_field = data.Field(lower=True, tokenize=char_tokenizer)
     word_field = data.Field(lower=True, tokenize=tokenizer)
 
-    listizer = data.Pipeline(int)
-    listizer.add_after(list)
+    listizer = data.Pipeline(inttolist)
     label_field = data.Field(sequential=False, use_vocab=False, preprocessing=listizer)
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
