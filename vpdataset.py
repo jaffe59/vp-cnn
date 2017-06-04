@@ -7,7 +7,7 @@ import math
 class VP(data.Dataset):
     """modeled after Shawn1993 github user's Pytorch implementation of Kim2014 - cnn for text categorization"""
 
-    filename = "wilkins_corrected.tsv"
+    filename = "wilkins_corrected.shuffled.tsv"
 
     @staticmethod
     def sort_key(ex):
@@ -26,7 +26,7 @@ class VP(data.Dataset):
         """
         #no preprocessing needed 
         fields = [('text', text_field), ('label', label_field)]
-        
+
         if examples is None:
                 path = self.dirname if path is None else path
                 examples = []
@@ -37,6 +37,7 @@ class VP(data.Dataset):
                         data.Example.fromlist([line.split("\t")[1], line.split("\t")[0]], fields) for line in lines] #in f]
                     #assume "target \t source", one instance per line
         # print(examples[0].text)
+        random.shuffle(examples)
         super(VP, self).__init__(examples, fields, **kwargs)
         
 
