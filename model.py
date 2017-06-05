@@ -51,8 +51,10 @@ class CNN_Text(nn.Module):
 
         x = x.unsqueeze(1) # (N,Ci,W,D)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1] #[(N,Co,W), ...]*len(Ks)
-        x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x] #[(N,Co), ...]*len(Ks)
         x = torch.cat(x, 1)
+        x = torch.max(x, 2)
+        # x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x] #[(N,Co), ...]*len(Ks)
+        # x = torch.cat(x, 1)
         '''
         x1 = self.conv_and_pool(x,self.conv13) #(N,Co)
         x2 = self.conv_and_pool(x,self.conv14) #(N,Co)
