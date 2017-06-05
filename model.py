@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.nn import init
 import torch.nn.functional as F
 from torch import autograd
 
@@ -28,6 +29,10 @@ class CNN_Text(nn.Module):
         # print(self.embed.weight.data[100])
         # print(self.embed.weight.data.size())
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
+        for layer in self.convs1:
+            init.normal(layer.weight.data)
+            layer.weight.data.mul_(0.01)
+            layer.bias.data.zero()
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))
         self.conv14 = nn.Conv2d(Ci, Co, (4, D))
@@ -35,6 +40,9 @@ class CNN_Text(nn.Module):
         '''
         self.dropout = nn.Dropout(args.dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, C)
+        init.normal(self.fc1.weight.data)
+        self.fc1.weight.data.mul_(0.01)
+        self.fc1.bias.data.zero()
         print(V, D, C, Ci, Co, Ks, self.convs1, self.fc1)
 
     def conv_and_pool(self, x, conv):
@@ -51,11 +59,10 @@ class CNN_Text(nn.Module):
 
         x = x.unsqueeze(1) # (N,Ci,W,D)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1] #[(N,Co,W), ...]*len(Ks)
-        print([x_p.size() for x_p in x])
+        # print([x_p.size() for x_p in x])
+
+        x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x] #[(N,Co), ...]*len(Ks)
         x = torch.cat(x, 1)
-        x = torch.max(x, 2)
-        # x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x] #[(N,Co), ...]*len(Ks)
-        # x = torch.cat(x, 1)
         '''
         x1 = self.conv_and_pool(x,self.conv13) #(N,Co)
         x2 = self.conv_and_pool(x,self.conv14) #(N,Co)
