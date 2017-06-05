@@ -32,7 +32,7 @@ class CNN_Text(nn.Module):
         for layer in self.convs1:
             init.normal(layer.weight.data)
             layer.weight.data.mul_(0.01)
-            layer.bias.data.zero()
+            layer.bias.data.zero_()
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))
         self.conv14 = nn.Conv2d(Ci, Co, (4, D))
@@ -42,7 +42,7 @@ class CNN_Text(nn.Module):
         self.fc1 = nn.Linear(len(Ks)*Co, C)
         init.normal(self.fc1.weight.data)
         self.fc1.weight.data.mul_(0.01)
-        self.fc1.bias.data.zero()
+        self.fc1.bias.data.zero_()
         print(V, D, C, Ci, Co, Ks, self.convs1, self.fc1)
 
     def conv_and_pool(self, x, conv):
