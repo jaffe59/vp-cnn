@@ -85,7 +85,7 @@ def eval(data_iter, model, args, **kwargs):
             feature, target = feature.cuda(), target.cuda()
 
         logit = model(feature)
-        loss = F.cross_entropy(logit, target, size_average=False)
+        loss = F.nll_loss(logit, target, size_average=False)
 
         avg_loss += loss.data[0]
         corrects += (torch.max(logit, 1)

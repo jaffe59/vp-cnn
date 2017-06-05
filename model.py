@@ -30,8 +30,7 @@ class CNN_Text(nn.Module):
         # print(self.embed.weight.data.size())
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         for layer in self.convs1:
-            init.normal(layer.weight.data)
-            layer.weight.data.mul_(0.01)
+            layer.weight.data.uniform_(-0.01, 0.01)
             layer.bias.data.zero_()
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))
