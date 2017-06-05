@@ -277,7 +277,7 @@ print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accurac
 print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)), file=log_file_handle)
 # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)), file=log_file_handle)
 
-if char_test_fold_accuracies:
+if char_test_fold_accuracies or word_test_fold_accuracies:
     # print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)))
     print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies), np.std(word_test_fold_accuracies)))
     # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)))
