@@ -3,32 +3,45 @@ import sys
 import torch
 import torch.autograd as autograd
 import torch.nn.functional as F
-
+import copy
 
 def train(train_iter, dev_iter, model, args, **kwargs):
     if args.cuda:
         model.cuda()
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    if args.optimizer == 'adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    elif args.optimizer == 'sgd':
+        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    elif args.optimizer == 'adadelta':
+        optimizer = torch.optim.Adadelta(model.parameters(), rho=0.95)
+    else:
+        raise Exception("bad optimizer!")
 
     steps = 0
     model.train()
+    best_acc = 0
+    best_model = None
     for epoch in range(1, args.epochs+1):
         for batch in train_iter:
             feature, target = batch.text, batch.label
-            feature.data.t_(), target.data.sub_(1)  # batch first, index align
+            feature.data.t_(), target.data.sub_(0)  # batch first, index align
+            # print(feature)
+            # print(train_iter.data().fields['text'].vocab.stoi)
             if args.cuda:
                 feature, target = feature.cuda(), target.cuda()
-
+            assert feature.volatile is False and target.volatile is False
+            # print(feature, target)
             optimizer.zero_grad()
             logit = model(feature)
-            loss = F.cross_entropy(logit, target)
+            loss = F.nll_loss(logit, target)
             loss.backward()
             optimizer.step()
 
             # max norm constraint
             if args.max_norm > 0:
-                model.fc1.weight.data.renorm_(2, 0, args.max_norm)
+                for row in model.fc1.weight.data:
+                    norm = row.norm() + 1e-7
+                    row.div_(norm).mul_(args.max_norm)
 
             steps += 1
             if steps % args.log_interval == 0:
@@ -50,25 +63,31 @@ def train(train_iter, dev_iter, model, args, **kwargs):
                                                                              accuracy,
                                                                              corrects,
                                                                              batch.batch_size), file=kwargs['log_file_handle'])
-                eval(dev_iter, model, args, **kwargs)
+        acc = eval(dev_iter, model, args, **kwargs)
+        if acc > best_acc:
+            best_acc = acc
+            best_model = copy.deepcopy(model)
+        # print(model.embed.weight[100])
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(model, save_path)
-
+    model = best_model
+    acc = eval(dev_iter, model, args, **kwargs)
+    return acc, model
 
 def eval(data_iter, model, args, **kwargs):
     model.eval()
     corrects, avg_loss = 0, 0
     for batch in data_iter:
         feature, target = batch.text, batch.label
-        feature.data.t_(), target.data.sub_(1)  # batch first, index align
+        feature.data.t_(), target.data.sub_(0)  # batch first, index align
         if args.cuda:
             feature, target = feature.cuda(), target.cuda()
 
         logit = model(feature)
-        loss = F.cross_entropy(logit, target, size_average=False)
+        loss = F.nll_loss(logit, target, size_average=False)
 
         avg_loss += loss.data[0]
         corrects += (torch.max(logit, 1)
@@ -105,12 +124,26 @@ def predict(text, model, text_field, label_feild):
 def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs):
     if args.cuda:
         logistic_model.cuda()
-    optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+    if not args.fine_tune:
+        if args.optimizer == 'adam':
+            optimizer = torch.optim.Adam(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+        elif args.optimizer == 'sgd':
+            optimizer = torch.optim.SGD(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2)
+        elif args.optimizer == 'adadelta':
+            optimizer = torch.optim.Adadelta(logistic_model.parameters(), lr=args.lr, weight_decay=args.l2, rho=0.95)
+        else:
+            raise Exception("bad optimizer!")
+    else:
+        char_cnn_params = {'params':char_model.parameters(), 'lr':args.lr * 1e-3}
+        word_cnn_params = {'params':word_model.parameters(), 'lr':args.lr * 1e-3}
+        logistic_params = {'params':logistic_model.parameters()}
+        optimizer = torch.optim.SGD([char_cnn_params, word_cnn_params, logistic_params], lr=args.lr)
 
     steps = 0
     logistic_model.train()
-    char_model.eval()
-    word_model.eval()
+    if not args.fine_tune:
+        char_model.eval()
+        word_model.eval()
     for epoch in range(1, args.epochs+1):
         for char_batch, word_batch in zip(char_train_data,word_train_data):
             # word_batch = next(word_train_data)
@@ -131,8 +164,9 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
             char_output = char_model(char_feature)
             word_output = word_model(word_feature)
 
-            char_output = autograd.Variable(char_output.data)
-            word_output = autograd.Variable(word_output.data)
+            if not args.fine_tune:
+                char_output = autograd.Variable(char_output.data)
+                word_output = autograd.Variable(word_output.data)
 
             optimizer.zero_grad()
             logit = logistic_model(char_output, word_output)
@@ -160,12 +194,14 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
                                                                              accuracy,
                                                                              corrects,
                                                                            char_batch.batch_size), file=kwargs['log_file_handle'])
-                    eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs)
+                eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs)
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(logistic_model, save_path)
+    acc = eval_logistic(char_dev_data, word_dev_data, char_model, word_model, logistic_model, args, **kwargs)
+    return acc
 
 def eval_logistic(char_data, word_data, char_model, word_model, logistic_model, args, **kwargs):
     logistic_model.eval()
