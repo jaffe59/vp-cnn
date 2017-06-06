@@ -37,7 +37,6 @@ parser.add_argument('-kernel-num', type=int, default=100, help='number of each k
 #parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
 parser.add_argument('-char-kernel-sizes', type=str, default='3', help='comma-separated kernel size to use for char convolution')
 parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for word convolution')
->>>>>>> 665de6f8aa5cbd36ed7c73ce2456cb0d697bebaa
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
 # device
 parser.add_argument('-device', type=int, default=0, help='device to use for iterate data, -1 mean cpu [default: -1]')
@@ -53,6 +52,7 @@ parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path t
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
 parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
 parser.add_argument('-fine-tune', action='store_true', default=False, help='whether to fine tune the final ensembled model')
+parser.add_argument('-ortho-init', action='store_true', default=False, help='use orthogonalization to improve weight matrix random initialization')
 args = parser.parse_args()
 
 if args.word_vector == 'glove':
@@ -162,7 +162,7 @@ for xfold in range(args.xfolds):
                                                         repeat=False, shuffle=args.shuffle, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
-    check_vocab(word_field)
+    #check_vocab(word_field)
     # print(label_field.vocab.itos)
 
 
@@ -271,12 +271,6 @@ for xfold in range(args.xfolds):
     """
     log_file_handle.flush()
 
-<<<<<<< HEAD
-average_xfold_accuracy = sum([res for res in ensemble_fold_accuracies]) / len(ensemble_fold_accuracies)
-print("folds: {0}".format(len(ensemble_fold_accuracies)))
-print("Average cross-fold accuracy: {0}".format(average_xfold_accuracy))
-log_file_handle.close()
-=======
 # print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_dev_fold_accuracies), np.std(char_dev_fold_accuracies)))
 print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)))
 # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)))
@@ -294,4 +288,3 @@ if char_test_fold_accuracies or word_test_fold_accuracies:
     # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
 
 log_file_handle.close()
->>>>>>> 665de6f8aa5cbd36ed7c73ce2456cb0d697bebaa
