@@ -39,7 +39,9 @@ def train(train_iter, dev_iter, model, args, **kwargs):
 
             # max norm constraint
             if args.max_norm > 0:
-                model.fc1.weight.data.renorm_(2, 0, args.max_norm)
+                for row in model.fc1.weight.data:
+                    norm = row.norm() + 1e-7
+                    row.div_(norm).mul_(args.max_norm)
 
             steps += 1
             if steps % args.log_interval == 0:
