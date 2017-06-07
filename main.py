@@ -177,7 +177,7 @@ for xfold in range(args.xfolds):
     # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
     #                                      , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
-                                                        repeat=False, shuffle=args.shuffle, sort=False, wv_type=args.word_vector,
+                                                        repeat=False, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
     #check_vocab(word_field)
