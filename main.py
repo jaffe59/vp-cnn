@@ -35,7 +35,7 @@ parser.add_argument('-char-embed-dim', type=int, default=128, help='number of ch
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
 #parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
-parser.add_argument('-char-kernel-sizes', type=str, default='3', help='comma-separated kernel size to use for char convolution')
+parser.add_argument('-char-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for char convolution')
 parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for word convolution')
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
 # device
@@ -174,8 +174,8 @@ for xfold in range(args.xfolds):
 
     label_field = data.Field(sequential=False, use_vocab=False, preprocessing=int)
 
-    # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
-    #                                      , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
+                                         , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
                                                         repeat=False, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
@@ -184,8 +184,7 @@ for xfold in range(args.xfolds):
     # print(label_field.vocab.itos)
 
 
-    # args.embed_num = len(text_field.vocab)
-    # args.class_num = len(label_field.vocab) - 1
+    args.embed_num = len(text_field.vocab)
     args.class_num = 359
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
     if update_args==True:
@@ -199,23 +198,31 @@ for xfold in range(args.xfolds):
         print("\t{}={}".format(attr.upper(), value), file=log_file_handle)
 
     # char CNN training and dev
-    # if args.snapshot is None:
-    #     char_cnn = model.CNN_Text(args, 'char')
-    # else :
-    #     print('\nLoading model from [%s]...' % args.snapshot)
-    #     try:
-    #         char_cnn = torch.load(args.snapshot)
-    #     except :
-    #         print("Sorry, This snapshot doesn't exist."); exit()
-    #
-    # acc = train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
-    # char_dev_fold_accuracies.append(acc)
-    # print("Completed fold {0}. Accuracy on Dev: {1} for CHAR".format(xfold, acc), file=log_file_handle)
-    # if args.eval_on_test:
-    #     result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
-    #     char_test_fold_accuracies.append(result)
-    #     print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
-    #     print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
+    if args.snapshot is None and args.num_experts == 0:
+        char_cnn = model.CNN_Text(args, 'char')
+    elif args.snapshot is None and args.num_experts > 0:
+        char_cnn = [model.CNN_Text(args, 'char') for i in range(args.num_experts)]
+    else :
+        print('\nLoading model from [%s]...' % args.snapshot)
+        try:
+            char_cnn = torch.load(args.snapshot)
+        except :
+            print("Sorry, This snapshot doesn't exist."); exit()
+    if args.num_experts > 0:
+        acc, char_cnn = train.ensemble_train(train_iter, dev_iter, char_cnn, args,
+                                             log_file_handle=log_file_handle)
+    else:
+        acc, char_cnn = train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
+    char_dev_fold_accuracies.append(acc)
+    print("Completed fold {0}. Accuracy on Dev: {1} for CHAR".format(xfold, acc), file=log_file_handle)
+    if args.eval_on_test:
+        if args.num_experts > 0:
+            result = train.ensemble_eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
+        else:
+            result = train.eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
+        char_test_fold_accuracies.append(result)
+        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
+        print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
@@ -225,7 +232,6 @@ for xfold in range(args.xfolds):
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
-
 
     if args.snapshot is None and args.num_experts == 0:
         word_cnn = model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors)
@@ -253,33 +259,36 @@ for xfold in range(args.xfolds):
         print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result), file=log_file_handle)
 
     # Ensemble training and dev
-    # if update_args==True:
-    #     args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
-    # else:
-    #     args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
+    if update_args==True:
+        args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
+    else:
+        args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
     update_args = False
     #
-    # if args.snapshot is None:
-    #     final_logit = model.SimpleLogistic(args)
-    # else :
-    #     print('\nLoading model from [%s]...' % args.snapshot)
-    #     try:
-    #         final_logit = torch.load(args.snapshot)
-    #     except:
-    #         print("Sorry, This snapshot doesn't exist."); exit()
-    #
-    # # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=-1, repeat=False)
-    # # train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=-1, repeat=False)
-    #
-    # acc = train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
-    # ensemble_dev_fold_accuracies.append(acc)
-    # print("Completed fold {0}. Accuracy on Dev: {1} for LOGIT".format(xfold, acc), file=log_file_handle)
-    # if args.eval_on_test:
-    #     result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
-    #     ensemble_test_fold_accuracies.append(result)
-    #
-    #     print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
-    #     print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result), file=log_file_handle)
+    if args.snapshot is None:
+        final_logit = model.SimpleLogistic(args)
+    else :
+        print('\nLoading model from [%s]...' % args.snapshot)
+        try:
+            final_logit = torch.load(args.snapshot)
+        except:
+            print("Sorry, This snapshot doesn't exist."); exit()
+
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
+                                         , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
+                                                        repeat=False, sort=False, shuffle=False, wv_type=args.word_vector,
+                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
+
+    acc = train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+    ensemble_dev_fold_accuracies.append(acc)
+    print("Completed fold {0}. Accuracy on Dev: {1} for LOGIT".format(xfold, acc), file=log_file_handle)
+    if args.eval_on_test:
+        result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+        ensemble_test_fold_accuracies.append(result)
+
+        print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
+        print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result), file=log_file_handle)
     """
     # train or predict
     if args.predict is not None:

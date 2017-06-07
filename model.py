@@ -93,3 +93,19 @@ class SimpleLogistic(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+
+class StackingNet(nn.Module):
+    def __init__(self, args):
+        super(StackingNet, self).__init__()
+        self.args = args
+        self.input_size = self.args.class_num
+        self.output_size = self.args.class_num
+        self.layer_num = self.args.layer_num
+        self.params = nn.ParameterList([torch.rand(1).expand(self.input_size) for i in range(2)])
+
+    def forward(self, inputs):
+        output = 0
+        for index, input in enumerate(inputs):
+            output += input * self.params[index]
+        output = F.log_softmax(output)
+        return output
