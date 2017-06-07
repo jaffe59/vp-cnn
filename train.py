@@ -27,7 +27,7 @@ def ensemble_predict(batch, models, args, **kwargs):
             indices.squeeze_()
             # print(indices[:10])
             for index, top_index in enumerate(indices):
-                total_logit[index][top_index] += 1
+                total_logit[index,top_index] += 1
         if args.cuda:
             total_logit = total_logit.cuda()
     for model in models:
