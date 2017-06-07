@@ -67,6 +67,8 @@ def ensemble_eval(data_iter, models, args, **kwargs):
             indices.squeeze_()
             for index, top_index in enumerate(indices):
                 total_logit[index][top_index] += 1
+        if args.cuda:
+            total_logit.cuda()
     print(total_logit[:10])
     corrects = (torch.max(total_logit, 1)
                  [1].view(target.size()) == target.data).sum()
