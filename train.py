@@ -255,9 +255,7 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
 
     steps = 0
     last_ensemble_model.train()
-    if not args.fine_tune:
-        char_model.eval()
-        word_model.eval()
+
     for epoch in range(1, args.epochs+1):
         for char_batch, word_batch in zip(char_train_data,word_train_data):
             # word_batch = next(word_train_data)
