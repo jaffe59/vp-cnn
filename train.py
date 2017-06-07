@@ -54,18 +54,20 @@ def ensemble_eval(data_iter, models, args, **kwargs):
     total_logit = 0
     if args.ensemble == 'poe':
         for some_logit in logits:
+            print(some_logit[:10])
             total_logit += some_logit
     elif args.ensemble == 'avg':
         total_logit = 0
         for some_logit in logits:
             total_logit += torch.exp(some_logit)
+    print(total_logit[:10])
     corrects = (torch.max(total_logit, 1)
                  [1].view(target.size()).data == target.data).sum()
     size = len(data_iter.dataset)
     accuracy = corrects / size * 100.0
-    print('\nEvaluation ensemble {} - acc: {:.4f}%({}/{}) \n'.format(args.ensemble.upper(), accuracy, corrects, size))
+    print('\nEvaluation ensemble {} - acc: {:.4f}%({}/{})'.format(args.ensemble.upper(), accuracy, corrects, size))
     if args.verbose:
-        print('Evaluation ensemble {} - acc: {:.4f}%({}/{}) \n'.format(args.ensemble.upper(), accuracy, corrects, size), file=kwargs['log_file_handle'])
+        print('Evaluation ensemble {} - acc: {:.4f}%({}/{})'.format(args.ensemble.upper(), accuracy, corrects, size), file=kwargs['log_file_handle'])
     return accuracy
 
 def train(train_iter, dev_iter, model, args, **kwargs):
