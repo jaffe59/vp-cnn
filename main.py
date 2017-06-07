@@ -53,7 +53,7 @@ parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to
 parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
 parser.add_argument('-fine-tune', action='store_true', default=False, help='whether to fine tune the final ensembled model')
 parser.add_argument('-ortho-init', action='store_true', default=False, help='use orthogonalization to improve weight matrix random initialization')
-parser.add_argument('-ensemble', type=str, default='poe', help='ensemble methods [default: poe]')
+parser.add_argument('-ensemble', type=str, default='poe', help='ensemble methods [default: poe. options: poe, avg, vot]')
 parser.add_argument('-num-experts', type=int, default=5, help='number of experts if poe is enabled [default: 5]')
 args = parser.parse_args()
 
