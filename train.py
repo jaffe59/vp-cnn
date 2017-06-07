@@ -64,6 +64,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         total_logit = torch.zeros(logits[0].size())
         for some_logit in logits:
             _, indices = torch.max(some_logit.data, 1)
+            indices.squeeze_()
             for index, top_index in enumerate(indices):
                 total_logit[index][top_index] += 1
     print(total_logit[:10])
