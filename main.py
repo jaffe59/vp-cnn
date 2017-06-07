@@ -302,7 +302,7 @@ for xfold in range(args.xfolds):
                                          shuffle=False, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
-                                                        num_experts=args.num_experts, device=args.device,
+                                                        device=args.device,
                                                         repeat=False, sort=False, shuffle=False,
                                                         wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path,

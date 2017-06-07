@@ -21,7 +21,7 @@ def ensemble_predict(batch, models, args, **kwargs):
     total_logit = 0
     if args.ensemble == 'poe':
         for some_logit in logits:
-            print(some_logit[:10])
+            # print(some_logit[:10])
             total_logit += some_logit.data
     elif args.ensemble == 'avg':
         total_logit = 0
@@ -32,7 +32,7 @@ def ensemble_predict(batch, models, args, **kwargs):
         for some_logit in logits:
             _, indices = torch.max(some_logit.data, 1)
             indices.squeeze_()
-            print(indices[:10])
+            # print(indices[:10])
             for index, top_index in enumerate(indices):
                 total_logit[index][top_index] += 1
         if args.cuda:
@@ -90,7 +90,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
     total_logit = 0
     if args.ensemble == 'poe':
         for some_logit in logits:
-            print(some_logit[:10])
+            # print(some_logit[:10])
             total_logit += some_logit.data
     elif args.ensemble == 'avg':
         total_logit = 0
@@ -101,14 +101,14 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         for some_logit in logits:
             _, indices = torch.max(some_logit.data, 1)
             indices.squeeze_()
-            print(indices[:10])
+            # print(indices[:10])
             for index, top_index in enumerate(indices):
                 total_logit[index][top_index] += 1
         if args.cuda:
             total_logit = total_logit.cuda()
-    print(torch.max(total_logit, 1)
-                 [1].view(target.size())[:10])
-    print(target[:10])
+    # print(torch.max(total_logit, 1)
+    #              [1].view(target.size())[:10])
+    # print(target[:10])
     corrects = (torch.max(total_logit, 1)
                  [1].view(target.size()) == target.data).sum()
     size = len(data_iter.dataset)
