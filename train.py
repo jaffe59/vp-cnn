@@ -15,6 +15,8 @@ def ensemble_predict(batch, models, args, **kwargs):
         model.train()
         logits.append(logit)
     total_logit = autograd.Variable(torch.zeros(logits[0].size()))
+    if args.cuda:
+        total_logit = total_logit.cuda()
     if args.ensemble == 'poe':
         for some_logit in logits:
             total_logit += some_logit
@@ -29,8 +31,6 @@ def ensemble_predict(batch, models, args, **kwargs):
             # print(indices[:10])
             for index, top_index in enumerate(indices):
                 total_logit.data[index,top_index] += 1
-        if args.cuda:
-            total_logit = total_logit.cuda()
     for model in models:
         model.train()
     return total_logit
