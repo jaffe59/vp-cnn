@@ -267,10 +267,10 @@ def train_final_ensemble(char_train_data, char_dev_data, word_train_data, word_d
                 char_output = char_model(char_feature)
                 word_output = word_model(word_feature)
             else:
-                char_batch = (char_feature, char_target)
-                word_batch = (word_feature, word_target)
-                char_output = ensemble_predict(char_batch, char_model, args)
-                word_output = ensemble_predict(word_batch, word_model, args)
+                char_train_tensors = (char_feature, char_target)
+                word_train_tensors = (word_feature, word_target)
+                char_output = ensemble_predict(char_train_tensors, char_model, args)
+                word_output = ensemble_predict(word_train_tensors, word_model, args)
 
             if not args.fine_tune:
                 char_output = autograd.Variable(char_output.data)
@@ -332,10 +332,10 @@ def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensem
             char_output = char_model(char_feature)
             word_output = word_model(word_feature)
         else:
-            char_batch = (char_feature, char_target)
-            word_batch = (word_feature, word_target)
-            char_output = ensemble_predict(char_batch, char_model, args)
-            word_output = ensemble_predict(word_batch, word_model, args)
+            char_tensors = (char_feature, char_target)
+            word_tensors = (word_feature, word_target)
+            char_output = ensemble_predict(char_tensors, char_model, args)
+            word_output = ensemble_predict(word_tensors, word_model, args)
 
 
         logit = last_ensemble_model((char_output, word_output))
