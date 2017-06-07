@@ -101,7 +101,7 @@ class StackingNet(nn.Module):
         self.input_size = self.args.class_num
         self.output_size = self.args.class_num
         self.layer_num = self.args.layer_num
-        self.params = nn.ParameterList([torch.rand(1).expand(self.input_size) for i in range(2)])
+        self.params = nn.ParameterList([nn.Parameter(torch.rand(1).expand(self.input_size)) for i in range(2)])
 
     def forward(self, inputs):
         output = 0
