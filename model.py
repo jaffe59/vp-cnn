@@ -101,11 +101,11 @@ class StackingNet(nn.Module):
         self.input_size = self.args.class_num
         self.output_size = self.args.class_num
         self.layer_num = self.args.layer_num
-        self.params = nn.ParameterList([nn.Parameter(torch.rand(1).expand(self.input_size)) for i in range(2)])
+        self.params = nn.ParameterList([nn.Parameter(torch.rand(1)) for i in range(2)])
 
     def forward(self, inputs):
         output = 0
         for index, input in enumerate(inputs):
-            output += input * self.params[index]
+            output += input * self.params[index].expand(input.size())
         output = F.log_softmax(output)
         return output
