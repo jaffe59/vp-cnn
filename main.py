@@ -103,7 +103,7 @@ def vp(text_field, label_field, foldid, num_experts=0, **kargs):
     kargs.pop('wv_dim')
     kargs.pop('wv_dir')
     kargs.pop("min_freq")
-    print(len(train_data[0]))
+    print(type(train_data), type(dev_data))
     if num_experts > 0:
         train_iter = []
         dev_iter = []
