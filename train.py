@@ -55,20 +55,20 @@ def ensemble_eval(data_iter, models, args, **kwargs):
     if args.ensemble == 'poe':
         for some_logit in logits:
             print(some_logit[:10])
-            total_logit += some_logit
+            total_logit += some_logit.data
     elif args.ensemble == 'avg':
         total_logit = 0
         for some_logit in logits:
-            total_logit += torch.exp(some_logit)
+            total_logit += torch.exp(some_logit.data)
     elif args.ensemble == 'vot':
         total_logit = torch.zeros(logits[0].size())
         for some_logit in logits:
-            _, indices = torch.max(total_logit, 1)
+            _, indices = torch.max(some_logit, 1)
             for index, top_index in enumerate(indices):
                 total_logit[index][top_index] += 1
     print(total_logit[:10])
     corrects = (torch.max(total_logit, 1)
-                 [1].view(target.size()).data == target.data).sum()
+                 [1].view(target.size()) == target.data).sum()
     size = len(data_iter.dataset)
     accuracy = corrects / size * 100.0
     print('\nEvaluation ensemble {} - acc: {:.4f}%({}/{})'.format(args.ensemble.upper(), accuracy, corrects, size))
