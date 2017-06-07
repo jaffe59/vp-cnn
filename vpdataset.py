@@ -89,13 +89,13 @@ class VP(data.Dataset):
 
             #test will be entire held out section (foldid)
             test = folds[foldid]
-            print(len(traindev[:dev_index]), 'num_experts', num_experts)
+            # print(len(traindev[:dev_index]), 'num_experts', num_experts)
             if num_experts > 0:
                 assert num_experts <= 5
                 trains = []
                 devs = []
                 dev_length = math.floor(len(traindev) * dev_ratio)
-                print(dev_length)
+                # print(dev_length)
                 for i in range(num_experts):
                     devs.append(cls(text_field, label_field, examples=traindev[dev_length*i:dev_length*(i+1)]))
                     trains.append(cls(text_field, label_field, examples=traindev[:dev_length*i]+traindev[dev_length*(i+1):]))

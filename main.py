@@ -92,7 +92,7 @@ def mr(text_field, label_field, **kargs):
 
 #load VP dataset
 def vp(text_field, label_field, foldid, num_experts=0, **kargs):
-    print('num_experts', num_experts)
+    # print('num_experts', num_experts)
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid, num_experts=num_experts)
     if num_experts > 0:
         text_field.build_vocab(train_data[0], dev_data[0], test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"],
@@ -104,7 +104,7 @@ def vp(text_field, label_field, foldid, num_experts=0, **kargs):
     kargs.pop('wv_dim')
     kargs.pop('wv_dir')
     kargs.pop("min_freq")
-    print(type(train_data), type(dev_data))
+    # print(type(train_data), type(dev_data))
     if num_experts > 0:
         train_iter = []
         dev_iter = []

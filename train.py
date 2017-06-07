@@ -8,7 +8,6 @@ import copy
 def ensemble_train(trains, devs, models, args, **kwargs):
     print('entering ensemble training:')
     acc_list = []
-    print(len(trains), len(trains[0]), len(devs), len(devs[0]))
     for i in range(len(trains)):
         print('ensemble training model {}'.format(i))
         model = models[i]
