@@ -89,7 +89,7 @@ class VP(data.Dataset):
 
             #test will be entire held out section (foldid)
             test = folds[foldid]
-            print(len(traindev[:dev_index]))
+            print(len(traindev[:dev_index]), 'num_experts', num_experts)
             if num_experts > 0:
                 assert num_experts <= 5
                 trains = []

@@ -92,6 +92,7 @@ def mr(text_field, label_field, **kargs):
 
 #load VP dataset
 def vp(text_field, label_field, foldid, num_experts=0, **kargs):
+    print('num_experts', num_experts)
     train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid, num_experts=num_experts)
     if num_experts > 0:
         text_field.build_vocab(train_data[0], dev_data[0], test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"],
@@ -173,8 +174,8 @@ for xfold in range(args.xfolds):
 
     label_field = data.Field(sequential=False, use_vocab=False, preprocessing=int)
 
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
-                                         , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
+    # train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
+    #                                      , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
                                                         repeat=False, shuffle=args.shuffle, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
