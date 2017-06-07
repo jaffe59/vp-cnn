@@ -18,42 +18,52 @@ parser.add_argument('-lr', type=float, default=0.001, help='initial learning rat
 parser.add_argument('-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]')
 parser.add_argument('-epochs', type=int, default=25, help='number of epochs for train [default: 25]')
 parser.add_argument('-batch-size', type=int, default=50, help='batch size for training [default: 50]')
-parser.add_argument('-log-interval',  type=int, default=1, help='how many steps to wait before logging training status [default: 1]')
-parser.add_argument('-log-file', type=str, default= datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+'result.txt', help='the name of the file to store results')
+parser.add_argument('-log-interval', type=int, default=1,
+                    help='how many steps to wait before logging training status [default: 1]')
+parser.add_argument('-log-file', type=str, default=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + 'result.txt',
+                    help='the name of the file to store results')
 parser.add_argument('-verbose', action='store_true', default=False, help='logging verbose info of training process')
 # parser.add_argument('-verbose-interval', type=int, default=5000, help='steps between two verbose logging')
-parser.add_argument('-test-interval', type=int, default=500, help='how many steps to wait before testing [default: 100]')
+parser.add_argument('-test-interval', type=int, default=500,
+                    help='how many steps to wait before testing [default: 100]')
 parser.add_argument('-eval-on-test', action='store_true', default=False, help='run evaluation on test data?')
 parser.add_argument('-save-interval', type=int, default=5000, help='how many steps to wait before saving [default:500]')
 parser.add_argument('-save-dir', type=str, default='snapshot', help='where to save the snapshot')
 # data 
-parser.add_argument('-shuffle', action='store_true', default=True, help='shuffle the data every epoch' )
+parser.add_argument('-shuffle', action='store_true', default=True, help='shuffle the data every epoch')
 # model
 parser.add_argument('-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
 parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]')
 parser.add_argument('-char-embed-dim', type=int, default=128, help='number of char embedding dimension [default: 128]')
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
-#parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
-parser.add_argument('-char-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for char convolution')
-parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for word convolution')
+# parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
+parser.add_argument('-char-kernel-sizes', type=str, default='3,4,5',
+                    help='comma-separated kernel size to use for char convolution')
+parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5',
+                    help='comma-separated kernel size to use for word convolution')
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
 # device
 parser.add_argument('-device', type=int, default=0, help='device to use for iterate data, -1 mean cpu [default: -1]')
-parser.add_argument('-yes-cuda', action='store_true', default=True, help='disable the gpu' )
+parser.add_argument('-yes-cuda', action='store_true', default=True, help='disable the gpu')
 # option
 parser.add_argument('-snapshot', type=str, default=None, help='filename of model snapshot [default: None]')
 parser.add_argument('-predict', type=str, default=None, help='predict the sentence given')
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
-parser.add_argument('-word-vector', type=str, default='w2v', help="use of vectors [default: w2v. options: 'glove' or 'w2v']")
+parser.add_argument('-word-vector', type=str, default='w2v',
+                    help="use of vectors [default: w2v. options: 'glove' or 'w2v']")
 parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
-parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
-parser.add_argument('-fine-tune', action='store_true', default=False, help='whether to fine tune the final ensembled model')
-parser.add_argument('-ortho-init', action='store_true', default=False, help='use orthogonalization to improve weight matrix random initialization')
-parser.add_argument('-ensemble', type=str, default='poe', help='ensemble methods [default: poe. options: poe, avg, vot]')
+parser.add_argument('-optimizer', type=str, default='adadelta',
+                    help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
+parser.add_argument('-fine-tune', action='store_true', default=False,
+                    help='whether to fine tune the final ensembled model')
+parser.add_argument('-ortho-init', action='store_true', default=False,
+                    help='use orthogonalization to improve weight matrix random initialization')
+parser.add_argument('-ensemble', type=str, default='poe',
+                    help='ensemble methods [default: poe. options: poe, avg, vot]')
 parser.add_argument('-num-experts', type=int, default=5, help='number of experts if poe is enabled [default: 5]')
 args = parser.parse_args()
 
@@ -62,20 +72,22 @@ if args.word_vector == 'glove':
 elif args.word_vector == 'w2v':
     if args.word_embed_dim != 300:
         raise Exception("w2v has no other kind of vectors than 300")
-else: args.word_vector = None
+else:
+    args.word_vector = None
+
 
 # load SST dataset
-def sst(text_field, label_field,  **kargs):
+def sst(text_field, label_field, **kargs):
     train_data, dev_data, test_data = datasets.SST.splits(text_field, label_field, fine_grained=True)
     text_field.build_vocab(train_data, dev_data, test_data)
     label_field.build_vocab(train_data, dev_data, test_data)
     train_iter, dev_iter, test_iter = data.BucketIterator.splits(
-                                        (train_data, dev_data, test_data), 
-                                        batch_sizes=(args.batch_size, 
-                                                     len(dev_data), 
-                                                     len(test_data)),
-                                        **kargs)
-    return train_iter, dev_iter, test_iter 
+        (train_data, dev_data, test_data),
+        batch_sizes=(args.batch_size,
+                     len(dev_data),
+                     len(test_data)),
+        **kargs)
+    return train_iter, dev_iter, test_iter
 
 
 # load MR dataset
@@ -84,21 +96,23 @@ def mr(text_field, label_field, **kargs):
     text_field.build_vocab(train_data, dev_data)
     label_field.build_vocab(train_data, dev_data)
     train_iter, dev_iter = data.Iterator.splits(
-                                (train_data, dev_data), 
-                                batch_sizes=(args.batch_size, len(dev_data)),
-                                **kargs)
+        (train_data, dev_data),
+        batch_sizes=(args.batch_size, len(dev_data)),
+        **kargs)
     return train_iter, dev_iter
 
 
-#load VP dataset
+# load VP dataset
 def vp(text_field, label_field, foldid, num_experts=0, **kargs):
     # print('num_experts', num_experts)
-    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid, num_experts=num_experts)
+    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid,
+                                                          num_experts=num_experts)
     if num_experts > 0:
         text_field.build_vocab(train_data[0], dev_data[0], test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"],
                                wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
     else:
-        text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
+        text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"],
+                               wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
     # label_field.build_vocab(train_data, dev_data, test_data)
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
@@ -109,22 +123,25 @@ def vp(text_field, label_field, foldid, num_experts=0, **kargs):
         train_iter = []
         dev_iter = []
         for i in range(num_experts):
-            this_train_iter, this_dev_iter, test_iter = data.Iterator.splits((train_data[i], dev_data[i], test_data), batch_sizes=(args.batch_size,
-                         len(dev_data[i]),
-                         len(test_data)),**kargs)
+            this_train_iter, this_dev_iter, test_iter = data.Iterator.splits((train_data[i], dev_data[i], test_data),
+                                                                             batch_sizes=(args.batch_size,
+                                                                                          len(dev_data[i]),
+                                                                                          len(test_data)), **kargs)
             train_iter.append(this_train_iter)
             dev_iter.append(this_dev_iter)
     else:
         train_iter, dev_iter, test_iter = data.Iterator.splits(
-                                        (train_data, dev_data, test_data), 
-                                        batch_sizes=(args.batch_size,
-                                                     len(dev_data),
-                                                     len(test_data)),
-                                        **kargs)
+            (train_data, dev_data, test_data),
+            batch_sizes=(args.batch_size,
+                         len(dev_data),
+                         len(test_data)),
+            **kargs)
     return train_iter, dev_iter, test_iter
+
 
 def char_tokenizer(mstring):
     return list(mstring)
+
 
 def check_vocab(field):
     itos = field.vocab.itos
@@ -141,6 +158,7 @@ def check_vocab(field):
     for word in other_vocab:
         if word not in itos:
             print(word)
+
 
 print("Beginning {0}-fold cross-validation...".format(args.xfolds))
 print("Logging the results in {}".format(args.log_file))
@@ -161,11 +179,10 @@ for xfold in range(args.xfolds):
     # load data
     print("\nLoading data...")
 
-
-    #text_field = data.Field(lower=True)
-    #label_field = data.Field(sequential=False)
-    #train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
-    #train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
+    # text_field = data.Field(lower=True)
+    # label_field = data.Field(sequential=False)
+    # train_iter, dev_iter = mr(text_field, label_field, device=-1, repeat=False)
+    # train_iter, dev_iter, test_iter = sst(text_field, label_field, device=-1, repeat=False)
 
     tokenizer = data.Pipeline(vpdataset.clean_str)
 
@@ -174,20 +191,23 @@ for xfold in range(args.xfolds):
 
     label_field = data.Field(sequential=False, use_vocab=False, preprocessing=int)
 
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, num_experts=args.num_experts,
+                                         device=args.device, repeat=False, shuffle=args.shuffle, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
-    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
+                                                        num_experts=args.num_experts, device=args.device,
                                                         repeat=False, sort=False, wv_type=args.word_vector,
-                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
+                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path,
+                                                        min_freq=args.min_freq)
 
-    #check_vocab(word_field)
+    # check_vocab(word_field)
     # print(label_field.vocab.itos)
 
 
     args.embed_num = len(text_field.vocab)
     args.class_num = 359
-    args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
-    if update_args==True:
+    args.cuda = args.yes_cuda and torch.cuda.is_available()  # ; del args.no_cuda
+    if update_args == True:
         args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
     else:
@@ -202,12 +222,13 @@ for xfold in range(args.xfolds):
         char_cnn = model.CNN_Text(args, 'char')
     elif args.snapshot is None and args.num_experts > 0:
         char_cnn = [model.CNN_Text(args, 'char') for i in range(args.num_experts)]
-    else :
+    else:
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
             char_cnn = torch.load(args.snapshot)
-        except :
-            print("Sorry, This snapshot doesn't exist."); exit()
+        except:
+            print("Sorry, This snapshot doesn't exist.");
+            exit()
     if args.num_experts > 0:
         acc, char_cnn = train.ensemble_train(train_iter, dev_iter, char_cnn, args,
                                              log_file_handle=log_file_handle)
@@ -226,7 +247,7 @@ for xfold in range(args.xfolds):
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
-    if update_args==True:
+    if update_args == True:
         # args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
         args.word_kernel_sizes = [int(k) for k in args.word_kernel_sizes.split(',')]
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
@@ -234,17 +255,19 @@ for xfold in range(args.xfolds):
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
 
     if args.snapshot is None and args.num_experts == 0:
-        word_cnn = model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors)
+        word_cnn = model.CNN_Text(args, 'word', vectors=word_field.vocab.vectors)
     elif args.snapshot is None and args.num_experts > 0:
-        word_cnn = [model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors) for i in range(args.num_experts)]
-    else :
+        word_cnn = [model.CNN_Text(args, 'word', vectors=word_field.vocab.vectors) for i in range(args.num_experts)]
+    else:
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
             word_cnn = torch.load(args.snapshot)
         except:
-            print("Sorry, This snapshot doesn't exist."); exit()
+            print("Sorry, This snapshot doesn't exist.");
+            exit()
     if args.num_experts > 0:
-        acc, word_cnn = train.ensemble_train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+        acc, word_cnn = train.ensemble_train(train_iter_word, dev_iter_word, word_cnn, args,
+                                             log_file_handle=log_file_handle)
     else:
         acc, word_cnn = train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
     word_dev_fold_accuracies.append(acc)
@@ -259,7 +282,7 @@ for xfold in range(args.xfolds):
         print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result), file=log_file_handle)
 
     # Ensemble training and dev
-    if update_args==True:
+    if update_args == True:
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'LOGIT')
@@ -267,24 +290,31 @@ for xfold in range(args.xfolds):
     #
     if args.snapshot is None:
         final_logit = model.SimpleLogistic(args)
-    else :
+    else:
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
             final_logit = torch.load(args.snapshot)
         except:
-            print("Sorry, This snapshot doesn't exist."); exit()
+            print("Sorry, This snapshot doesn't exist.");
+            exit()
 
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=False, sort=False
+    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False,
+                                         shuffle=False, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
-    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
-                                                        repeat=False, sort=False, shuffle=False, wv_type=args.word_vector,
-                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
+                                                        num_experts=args.num_experts, device=args.device,
+                                                        repeat=False, sort=False, shuffle=False,
+                                                        wv_type=args.word_vector,
+                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path,
+                                                        min_freq=args.min_freq)
 
-    acc = train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+    acc = train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit,
+                               args, log_file_handle=log_file_handle)
     ensemble_dev_fold_accuracies.append(acc)
     print("Completed fold {0}. Accuracy on Dev: {1} for LOGIT".format(xfold, acc), file=log_file_handle)
     if args.eval_on_test:
-        result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args, log_file_handle=log_file_handle)
+        result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args,
+                                     log_file_handle=log_file_handle)
         ensemble_test_fold_accuracies.append(result)
 
         print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
@@ -309,16 +339,19 @@ for xfold in range(args.xfolds):
 print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)))
 # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)))
 # print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_dev_fold_accuracies), np.std(char_dev_fold_accuracies)), file=log_file_handle)
-print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)), file=log_file_handle)
+print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)),
+      file=log_file_handle)
 # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)), file=log_file_handle)
 
 if char_test_fold_accuracies or word_test_fold_accuracies:
     # print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)))
-    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies), np.std(word_test_fold_accuracies)))
+    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies),
+                                                       np.std(word_test_fold_accuracies)))
     # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)))
 
     # print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)), file=log_file_handle)
-    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies), np.std(word_test_fold_accuracies)), file=log_file_handle)
+    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies),
+                                                       np.std(word_test_fold_accuracies)), file=log_file_handle)
     # print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
 
 log_file_handle.close()
