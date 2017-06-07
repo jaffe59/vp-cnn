@@ -277,8 +277,8 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
                 char_output = char_model(char_feature)
                 word_output = word_model(word_feature)
             else:
-                char_output = ensemble_eval(char_feature, char_model, args)
-                word_output = ensemble_eval(word_feature, word_model, args)
+                char_output = ensemble_predict(char_feature, char_model, args)
+                word_output = ensemble_predict(word_feature, word_model, args)
 
             if not args.fine_tune:
                 char_output = autograd.Variable(char_output.data)
@@ -340,8 +340,8 @@ def eval_logistic(char_data, word_data, char_model, word_model, last_ensemble_mo
             char_output = char_model(char_feature)
             word_output = word_model(word_feature)
         else:
-            char_output = ensemble_eval(char_feature, char_model, args)
-            word_output = ensemble_eval(word_feature, word_model, args)
+            char_output = ensemble_predict(char_feature, char_model, args)
+            word_output = ensemble_predict(word_feature, word_model, args)
 
 
         logit = last_ensemble_model(char_output, word_output)
