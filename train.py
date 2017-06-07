@@ -9,12 +9,8 @@ def ensemble_predict(batch, models, args, **kwargs):
     for model in models:
         model.eval()
     logits = []
+    feature, target = batch
     for index, model in enumerate(models):
-        feature, target = batch.text, batch.label
-        feature.data.t_(), target.data.sub_(0)  # batch first, index align
-        if args.cuda:
-            feature, target = feature.cuda(), target.cuda()
-
         logit = model(feature) # log softmaxed
         model.train()
         logits.append(logit)
@@ -258,27 +254,25 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
 
     for epoch in range(1, args.epochs+1):
         for char_batch, word_batch in zip(char_train_data,word_train_data):
-            # word_batch = next(word_train_data)
-
             char_feature, char_target = char_batch.text, char_batch.label
-            char_feature.data.t_(), char_target.data.sub_(1)  # batch first, index align
-
+            char_feature.data.t_()
             word_feature, word_target = word_batch.text, word_batch.label
-            word_feature.data.t_(), word_target.data.sub_(1)  # batch first, index align
-            # print(char_batch.data, word_batch.data)
+            word_feature.data.t_()
+
             if args.cuda:
                 char_feature, char_target = char_feature.cuda(), char_target.cuda()
                 word_feature, word_target = word_feature.cuda(), word_target.cuda()
 
             assert torch.equal(char_target.data, word_target.data), "Mismatching data sample! {}, {}".format(char_target.data,
                                                                                                         word_target.data)
-
             if args.num_experts == 0:
                 char_output = char_model(char_feature)
                 word_output = word_model(word_feature)
             else:
-                char_output = ensemble_predict(char_feature, char_model, args)
-                word_output = ensemble_predict(word_feature, word_model, args)
+                char_batch = (char_feature, char_target)
+                word_batch = (word_feature, word_target)
+                char_output = ensemble_predict(char_batch, char_model, args)
+                word_output = ensemble_predict(word_batch, word_model, args)
 
             if not args.fine_tune:
                 char_output = autograd.Variable(char_output.data)
@@ -324,11 +318,11 @@ def eval_logistic(char_data, word_data, char_model, word_model, last_ensemble_mo
     corrects, avg_loss = 0, 0
     for char_batch, word_batch in zip(char_data, word_data):
         char_feature, char_target = char_batch.text, char_batch.label
-        char_feature.data.t_(), char_target.data.sub_(1)  # batch first, index align
+        char_feature.data.t_()  # batch first, index align
         char_feature.volatile = True
 
         word_feature, word_target = word_batch.text, word_batch.label
-        word_feature.data.t_(), word_target.data.sub_(1)  # batch first, index align
+        word_feature.data.t_() # batch first, index align
         word_feature.volatile = True
 
         if args.cuda:
@@ -340,11 +334,13 @@ def eval_logistic(char_data, word_data, char_model, word_model, last_ensemble_mo
             char_output = char_model(char_feature)
             word_output = word_model(word_feature)
         else:
-            char_output = ensemble_predict(char_feature, char_model, args)
-            word_output = ensemble_predict(word_feature, word_model, args)
+            char_batch = (char_feature, char_target)
+            word_batch = (word_feature, word_target)
+            char_output = ensemble_predict(char_batch, char_model, args)
+            word_output = ensemble_predict(word_batch, word_model, args)
 
 
-        logit = last_ensemble_model(char_output, word_output)
+        logit = last_ensemble_model((char_output, word_output))
         loss = F.nll_loss(logit, char_target, size_average=False)
 
         char_feature.volatile = False
