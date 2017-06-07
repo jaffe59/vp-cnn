@@ -184,7 +184,7 @@ for xfold in range(args.xfolds):
     # print(label_field.vocab.itos)
 
 
-    args.embed_num = len(text_field.vocab)
+    # args.embed_num = len(text_field.vocab)
     # args.class_num = len(label_field.vocab) - 1
     args.class_num = 359
     args.cuda = args.yes_cuda and torch.cuda.is_available()#; del args.no_cuda
