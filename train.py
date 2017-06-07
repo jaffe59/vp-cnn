@@ -228,7 +228,7 @@ def predict(text, model, text_field, label_feild):
     _, predicted = torch.max(output, 1)
     return label_feild.vocab.itos[predicted.data[0][0]+1]
 
-def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, last_ensemble_model, args, **kwargs):
+def train_final_ensemble(char_train_data, char_dev_data, word_train_data, word_dev_data, char_model, word_model, last_ensemble_model, args, **kwargs):
     if args.cuda:
         last_ensemble_model.cuda()
     if not args.fine_tune:
@@ -302,16 +302,16 @@ def train_logistic(char_train_data, char_dev_data, word_train_data, word_dev_dat
                                                                              accuracy,
                                                                              corrects,
                                                                            char_batch.batch_size), file=kwargs['log_file_handle'])
-                eval_logistic(char_dev_data, word_dev_data, char_model, word_model, last_ensemble_model, args, **kwargs)
+                eval_final_ensemble(char_dev_data, word_dev_data, char_model, word_model, last_ensemble_model, args, **kwargs)
             # if steps % args.save_interval == 0:
             #     if not os.path.isdir(args.save_dir): os.makedirs(args.save_dir)
             #     save_prefix = os.path.join(args.save_dir, 'snapshot')
             #     save_path = '{}_steps{}.pt'.format(save_prefix, steps)
             #     torch.save(logistic_model, save_path)
-    acc = eval_logistic(char_dev_data, word_dev_data, char_model, word_model, last_ensemble_model, args, **kwargs)
+    acc = eval_final_ensemble(char_dev_data, word_dev_data, char_model, word_model, last_ensemble_model, args, **kwargs)
     return acc
 
-def eval_logistic(char_data, word_data, char_model, word_model, last_ensemble_model, args, **kwargs):
+def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensemble_model, args, **kwargs):
     last_ensemble_model.eval()
     corrects, avg_loss = 0, 0
     for char_batch, word_batch in zip(char_data, word_data):

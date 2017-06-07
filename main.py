@@ -289,7 +289,7 @@ for xfold in range(args.xfolds):
     update_args = False
     #
     if args.snapshot is None:
-        final_logit = model.SimpleLogistic(args)
+        final_logit = model.StackingNet(args)
     else:
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
@@ -308,13 +308,13 @@ for xfold in range(args.xfolds):
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path,
                                                         min_freq=args.min_freq)
 
-    acc = train.train_logistic(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit,
-                               args, log_file_handle=log_file_handle)
+    acc = train.train_final_ensemble(train_iter, dev_iter, train_iter_word, dev_iter_word, char_cnn, word_cnn, final_logit,
+                                     args, log_file_handle=log_file_handle)
     ensemble_dev_fold_accuracies.append(acc)
     print("Completed fold {0}. Accuracy on Dev: {1} for LOGIT".format(xfold, acc), file=log_file_handle)
     if args.eval_on_test:
-        result = train.eval_logistic(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args,
-                                     log_file_handle=log_file_handle)
+        result = train.eval_final_ensemble(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args,
+                                           log_file_handle=log_file_handle)
         ensemble_test_fold_accuracies.append(result)
 
         print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
