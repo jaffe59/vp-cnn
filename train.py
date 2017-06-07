@@ -22,12 +22,13 @@ def ensemble_predict(batch, models, args, **kwargs):
         for some_logit in logits:
             total_logit += torch.exp(some_logit.data)
     elif args.ensemble == 'vot':
+        # this does not support backpropagation
         for some_logit in logits:
             _, indices = torch.max(some_logit.data, 1)
             indices.squeeze_()
             # print(indices[:10])
             for index, top_index in enumerate(indices):
-                total_logit[index,top_index] += 1
+                total_logit.data[index,top_index] += 1
         if args.cuda:
             total_logit = total_logit.cuda()
     for model in models:
