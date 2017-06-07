@@ -72,6 +72,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
             total_logit = total_logit.cuda()
     print(torch.max(total_logit, 1)
                  [1].view(target.size())[:10])
+    print(target[:10])
     corrects = (torch.max(total_logit, 1)
                  [1].view(target.size()) == target.data).sum()
     size = len(data_iter.dataset)
