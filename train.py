@@ -41,12 +41,12 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         avg_loss = avg_loss/size
         accuracy = corrects/size * 100.0
         model.train()
-        print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+        print('\nEvaluation model {} - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(index, avg_loss,
                                                                            accuracy,
                                                                            corrects,
                                                                            size))
         if args.verbose:
-            print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+            print('Evaluation model {} - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(index, avg_loss,
                                                                                accuracy,
                                                                                corrects,
                                                                                size), file=kwargs['log_file_handle'])
