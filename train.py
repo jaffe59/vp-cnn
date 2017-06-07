@@ -14,17 +14,14 @@ def ensemble_predict(batch, models, args, **kwargs):
         logit = model(feature) # log softmaxed
         model.train()
         logits.append(logit)
-    total_logit = 0
+    total_logit = autograd.Variable(torch.zeros(logits[0].size()))
     if args.ensemble == 'poe':
         for some_logit in logits:
-            # print(some_logit[:10])
             total_logit += some_logit.data
     elif args.ensemble == 'avg':
-        total_logit = 0
         for some_logit in logits:
             total_logit += torch.exp(some_logit.data)
     elif args.ensemble == 'vot':
-        total_logit = torch.zeros(logits[0].size())
         for some_logit in logits:
             _, indices = torch.max(some_logit.data, 1)
             indices.squeeze_()
