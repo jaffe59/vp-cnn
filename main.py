@@ -110,7 +110,7 @@ def vp(text_field, label_field, foldid, num_experts=0, **kargs):
             this_train_iter, this_dev_iter, test_iter = data.Iterator.splits((train_data[i], dev_data[i], test_data), batch_sizes=(args.batch_size,
                          len(dev_data[i]),
                          len(test_data)),**kargs)
-            train_iter.append(this_dev_iter)
+            train_iter.append(this_train_iter)
             dev_iter.append(this_dev_iter)
     else:
         train_iter, dev_iter, test_iter = data.Iterator.splits(
