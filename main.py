@@ -47,12 +47,14 @@ parser.add_argument('-predict', type=str, default=None, help='predict the senten
 parser.add_argument('-test', action='store_true', default=False, help='train or test')
 parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
-parser.add_argument('-word-vector', type=str, default='w2v', help="use of vectors [default: None. options: 'glove' or 'w2v']")
+parser.add_argument('-word-vector', type=str, default='w2v', help="use of vectors [default: w2v. options: 'glove' or 'w2v']")
 parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
 parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
 parser.add_argument('-fine-tune', action='store_true', default=False, help='whether to fine tune the final ensembled model')
 parser.add_argument('-ortho-init', action='store_true', default=False, help='use orthogonalization to improve weight matrix random initialization')
+parser.add_argument('-ensemble', type=str, default='poe', help='ensemble methods [default: poe]')
+parser.add_argument('-num-experts', type=int, default=5, help='number of experts if poe is enabled [default: 5]')
 args = parser.parse_args()
 
 if args.word_vector == 'glove':
@@ -89,15 +91,29 @@ def mr(text_field, label_field, **kargs):
 
 
 #load VP dataset
-def vp(text_field, label_field, foldid, **kargs):
-    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid)
-    text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
+def vp(text_field, label_field, foldid, num_experts=0, **kargs):
+    train_data, dev_data, test_data = vpdataset.VP.splits(text_field, label_field, foldid=foldid, num_experts=num_experts)
+    if num_experts > 0:
+        text_field.build_vocab(train_data[0], dev_data[0], test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"],
+                               wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
+    else:
+        text_field.build_vocab(train_data, dev_data, test_data, wv_type=kargs["wv_type"], wv_dim=kargs["wv_dim"], wv_dir=kargs["wv_dir"], min_freq=kargs['min_freq'])
     # label_field.build_vocab(train_data, dev_data, test_data)
     kargs.pop('wv_type')
     kargs.pop('wv_dim')
     kargs.pop('wv_dir')
     kargs.pop("min_freq")
-    train_iter, dev_iter, test_iter = data.Iterator.splits(
+    if num_experts > 0:
+        train_iter = []
+        dev_iter = []
+        for i in range(num_experts):
+            this_train_iter, this_dev_iter, test_iter = data.Iterator.splits((train_data[i], dev_data[i], test_data), batch_sizes=(args.batch_size,
+                         len(dev_data[i]),
+                         len(test_data)),**kargs)
+            train_iter.append(this_dev_iter)
+            dev_iter.append(this_dev_iter)
+    else:
+        train_iter, dev_iter, test_iter = data.Iterator.splits(
                                         (train_data, dev_data, test_data), 
                                         batch_sizes=(args.batch_size,
                                                      len(dev_data),
@@ -158,7 +174,7 @@ for xfold in range(args.xfolds):
 
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False, shuffle=args.shuffle, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
-    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, device=args.device,
+    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold, num_experts=args.num_experts, device=args.device,
                                                         repeat=False, shuffle=args.shuffle, sort=False, wv_type=args.word_vector,
                                                         wv_dim=args.word_embed_dim, wv_dir=args.emb_path, min_freq=args.min_freq)
 
@@ -209,20 +225,27 @@ for xfold in range(args.xfolds):
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'WORD')
 
 
-    if args.snapshot is None:
+    if args.snapshot is None and args.num_experts == 0:
         word_cnn = model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors)
+    elif args.snapshot is None and args.num_experts > 0:
+        word_cnn = [model.CNN_Text(args, 'word', vectors =word_field.vocab.vectors) for i in range(args.num_experts)]
     else :
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
             word_cnn = torch.load(args.snapshot)
         except:
             print("Sorry, This snapshot doesn't exist."); exit()
-
-    acc, word_cnn = train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+    if args.num_experts > 0:
+        acc, word_cnn = train.ensemble_train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+    else:
+        acc, word_cnn = train.train(train_iter_word, dev_iter_word, word_cnn, args, log_file_handle=log_file_handle)
     word_dev_fold_accuracies.append(acc)
     print("Completed fold {0}. Accuracy on Dev: {1} for WORD".format(xfold, acc), file=log_file_handle)
     if args.eval_on_test:
-        result = train.eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+        if args.num_experts > 0:
+            result = train.ensemble_eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
+        else:
+            result = train.eval(test_iter_word, word_cnn, args, log_file_handle=log_file_handle)
         word_test_fold_accuracies.append(result)
         print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result))
         print("Completed fold {0}. Accuracy on Test: {1} for WORD".format(xfold, result), file=log_file_handle)

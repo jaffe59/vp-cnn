@@ -30,10 +30,11 @@ class CNN_Text(nn.Module):
         # print(self.embed.weight.data.size())
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
         for layer in self.convs1:
-            layer.weight.data.uniform_(-0.01, 0.01)
-        if args.ortho_init == True:
+            if args.ortho_init == True:
                 init.orthogonal(layer.weight.data)
-        layer.bias.data.zero_()
+            else:
+                layer.weight.data.uniform_(-0.01, 0.01)
+            layer.bias.data.zero_()
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))
         self.conv14 = nn.Conv2d(Ci, Co, (4, D))
@@ -41,10 +42,11 @@ class CNN_Text(nn.Module):
         '''
         self.dropout = nn.Dropout(args.dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, C)
-        init.normal(self.fc1.weight.data)
-        self.fc1.weight.data.mul_(0.01)
         if args.ortho_init == True:
             init.orthogonal(self.fc1.weight.data)
+        else:
+            init.normal(self.fc1.weight.data)
+            self.fc1.weight.data.mul_(0.01)
         self.fc1.bias.data.zero_()
         print(V, D, C, Ci, Co, Ks, self.convs1, self.fc1)
 

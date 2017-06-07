@@ -5,6 +5,69 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 import copy
 
+def ensemble_train(trains, devs, models, args):
+    print('entering ensemble training:')
+    acc_list = []
+    for i in range(len(trains)):
+        print('ensemble training model {}'.format(i))
+        model = models[i]
+        if args.cuda:
+            model.cuda()
+        acc, model = train(trains[i], devs[i], model, args)
+        models[i] = model
+        acc_list.append(acc)
+    return acc_list, models
+
+def ensemble_eval(data_iter, models, args, **kwargs):
+    for model in models:
+        model.eval()
+    corrects, avg_loss = [], []
+    logits = []
+    for index, model in enumerate(models):
+        for batch in data_iter: # should be only 1 batch
+            feature, target = batch.text, batch.label
+            feature.data.t_(), target.data.sub_(0)  # batch first, index align
+            if args.cuda:
+                feature, target = feature.cuda(), target.cuda()
+
+            logit = model(feature) # log softmaxed
+            loss = F.nll_loss(logit, target, size_average=False)
+
+            avg_loss = loss.data[0]
+            corrects = (torch.max(logit, 1)
+                         [1].view(target.size()).data == target.data).sum()
+
+        size = len(data_iter.dataset)
+        avg_loss = avg_loss/size
+        accuracy = corrects/size * 100.0
+        model.train()
+        print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+                                                                           accuracy,
+                                                                           corrects,
+                                                                           size))
+        if args.verbose:
+            print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+                                                                               accuracy,
+                                                                               corrects,
+                                                                               size), file=kwargs['log_file_handle'])
+        logits.append(logit)
+    total_logit = 0
+    if args.ensemble == 'poe':
+        for some_logit in logits:
+            total_logit += some_logit
+    elif args.ensemble == 'avg':
+        total_logit = 0
+        for some_logit in logits:
+            total_logit += torch.exp(some_logit)
+    corrects = (torch.max(total_logit, 1)
+                 [1].view(target.size()).data == target.data).sum()
+    size = len(data_iter.dataset)
+    accuracy = corrects / size * 100.0
+    print('\nEvaluation ensemble {} - acc: {:.4f}%({}/{}) \n'.format(args.ensemble.upper(), accuracy, corrects, size))
+    if args.verbose:
+        print('Evaluation ensemble {} - acc: {:.4f}%({}/{}) \n'.format(args.ensemble.upper(), accuracy, corrects, size), file=kwargs['log_file_handle'])
+    return accuracy
+
 def train(train_iter, dev_iter, model, args, **kwargs):
     if args.cuda:
         model.cuda()
@@ -48,8 +111,8 @@ def train(train_iter, dev_iter, model, args, **kwargs):
                 corrects = (torch.max(logit, 1)[1].view(target.size()).data == target.data).sum()
                 accuracy = corrects/batch.batch_size * 100.0
                 sys.stdout.write(
-                    '\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps, 
-                                                                             loss.data[0], 
+                    '\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps,
+                                                                             loss.data[0],
                                                                              accuracy,
                                                                              corrects,
                                                                              batch.batch_size))
