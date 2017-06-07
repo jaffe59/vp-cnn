@@ -61,7 +61,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         for some_logit in logits:
             total_logit += torch.exp(some_logit)
     elif args.ensemble == 'vot':
-        total_logit = torch.zeros_like(logits[0])
+        total_logit = torch.zeros(logits[0].size())
         for some_logit in logits:
             _, indices = torch.max(total_logit, 1)
             for index, top_index in enumerate(indices):
