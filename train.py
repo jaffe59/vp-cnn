@@ -8,6 +8,7 @@ import copy
 def ensemble_train(trains, devs, models, args, **kwargs):
     print('entering ensemble training:')
     acc_list = []
+    print(len(trains), len(trains[0]), len(devs), len(devs[0]))
     for i in range(len(trains)):
         print('ensemble training model {}'.format(i))
         model = models[i]
@@ -160,12 +161,12 @@ def eval(data_iter, model, args, **kwargs):
     avg_loss = avg_loss/size
     accuracy = corrects/size * 100.0
     model.train()
-    print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss, 
+    print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(avg_loss,
                                                                        accuracy, 
                                                                        corrects, 
                                                                        size))
     if args.verbose:
-        print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(avg_loss,
+        print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(avg_loss,
                                                                            accuracy,
                                                                            corrects,
                                                                            size), file=kwargs['log_file_handle'])
