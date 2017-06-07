@@ -5,7 +5,7 @@ import torch.autograd as autograd
 import torch.nn.functional as F
 import copy
 
-def ensemble_train(trains, devs, models, args):
+def ensemble_train(trains, devs, models, args, **kwargs):
     print('entering ensemble training:')
     acc_list = []
     for i in range(len(trains)):
@@ -13,7 +13,7 @@ def ensemble_train(trains, devs, models, args):
         model = models[i]
         if args.cuda:
             model.cuda()
-        acc, model = train(trains[i], devs[i], model, args)
+        acc, model = train(trains[i], devs[i], model, args,**kwargs)
         models[i] = model
         acc_list.append(acc)
     return acc_list, models
