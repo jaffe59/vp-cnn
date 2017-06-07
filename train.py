@@ -17,10 +17,10 @@ def ensemble_predict(batch, models, args, **kwargs):
     total_logit = autograd.Variable(torch.zeros(logits[0].size()))
     if args.ensemble == 'poe':
         for some_logit in logits:
-            total_logit += some_logit.data
+            total_logit += some_logit
     elif args.ensemble == 'avg':
         for some_logit in logits:
-            total_logit += torch.exp(some_logit.data)
+            total_logit += torch.exp(some_logit)
     elif args.ensemble == 'vot':
         # this does not support backpropagation
         for some_logit in logits:
