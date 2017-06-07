@@ -96,8 +96,8 @@ class VP(data.Dataset):
                 devs = []
                 dev_length = math.floor(len(traindev) * dev_ratio)
                 for i in range(num_experts):
-                    trains.append(cls(text_field, label_field, examples=traindev[dev_length*i:dev_length*(i+1)], train=True))
-                    devs.append(cls(text_field, label_field, examples=traindev[:dev_length*i]+traindev[dev_length*(i+1):], train=False))
+                    trains.append(cls(text_field, label_field, examples=traindev[dev_length*i:dev_length*(i+1)]))
+                    devs.append(cls(text_field, label_field, examples=traindev[:dev_length*i]+traindev[dev_length*(i+1):]))
                 return (trains, devs, cls(text_field, label_field, examples=test))
 
             else:
