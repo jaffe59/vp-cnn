@@ -53,6 +53,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         model.eval()
     corrects, avg_loss = [], []
     logits = []
+    data_iter.shuffle = False
     for index, model in enumerate(models):
         for batch in data_iter: # should be only 1 batch
             feature, target = batch.text, batch.label
