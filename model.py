@@ -80,7 +80,6 @@ class CNN_Text(nn.Module):
         logit = F.log_softmax(self.fc1(x)) # (N,C)
         return logit
 
-
 class SimpleLogistic(nn.Module):
     def __init__(self, args):
         super(SimpleLogistic, self).__init__()
