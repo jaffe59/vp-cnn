@@ -26,15 +26,17 @@ class CNN_Text(nn.Module):
         self.embed = nn.Embedding(V, D, padding_idx=1)
         if char_or_word != 'char' and vectors is not None:
             self.embed.weight.data = vectors
+
         # print(self.embed.weight.data[100])
         # print(self.embed.weight.data.size())
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
-        for layer in self.convs1:
-            if args.ortho_init == True:
-                init.orthogonal(layer.weight.data)
-            else:
-                layer.weight.data.uniform_(-0.01, 0.01)
-            layer.bias.data.zero_()
+        if char_or_word == 'word':
+            for layer in self.convs1:
+                if args.ortho_init == True:
+                    init.orthogonal(layer.weight.data)
+                else:
+                    layer.weight.data.uniform_(-0.01, 0.01)
+                layer.bias.data.zero_()
         '''
         self.conv13 = nn.Conv2d(Ci, Co, (3, D))
         self.conv14 = nn.Conv2d(Ci, Co, (4, D))
@@ -42,12 +44,13 @@ class CNN_Text(nn.Module):
         '''
         self.dropout = nn.Dropout(args.dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, C)
-        if args.ortho_init == True:
-            init.orthogonal(self.fc1.weight.data)
-        else:
-            init.normal(self.fc1.weight.data)
-            self.fc1.weight.data.mul_(0.01)
-        self.fc1.bias.data.zero_()
+        if char_or_word == 'word':
+            if args.ortho_init == True:
+                init.orthogonal(self.fc1.weight.data)
+            else:
+                init.normal(self.fc1.weight.data)
+                self.fc1.weight.data.mul_(0.01)
+            self.fc1.bias.data.zero_()
         # print(V, D, C, Ci, Co, Ks, self.convs1, self.fc1)
 
     def conv_and_pool(self, x, conv):
