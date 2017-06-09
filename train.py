@@ -113,7 +113,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         print('Evaluation ensemble {} - acc: {:.4f}%({}/{})'.format(args.ensemble.upper(), accuracy, corrects, size), file=kwargs['log_file_handle'])
     return accuracy
 
-def train(train_iter, dev_iter, model, args, always_norm=True):
+def train(train_iter, dev_iter, model, args, always_norm=True, **kwargs):
     if args.cuda:
         model.cuda()
     if args.optimizer == 'adam':
