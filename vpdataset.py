@@ -68,6 +68,16 @@ class VP(data.Dataset):
         #examples = cls(text_field, label_field, path=path, **kwargs).examples
         examples = cls(text_field, label_field, path=root, **kwargs).examples
         if shuffle: random.shuffle(examples)
+        fields = [('text', text_field), ('label', label_field)]
+        label_examples = []
+        label_filename = 'labels.txt'
+        with open(label_filename) as f:
+            lines = f.readlines()
+            # pdb.set_trace()
+            for line in lines:
+                label, text = line.split("\t")
+                this_example = data.Example.fromlist([text, label], fields)
+                label_examples += [this_example]
         
         if foldid==None:
             dev_index = -1 * int(dev_ratio*len(examples))
@@ -98,11 +108,11 @@ class VP(data.Dataset):
                 # print(dev_length)
                 for i in range(num_experts):
                     devs.append(cls(text_field, label_field, examples=traindev[dev_length*i:dev_length*(i+1)]))
-                    trains.append(cls(text_field, label_field, examples=traindev[:dev_length*i]+traindev[dev_length*(i+1):]))
+                    trains.append(cls(text_field, label_field, examples=traindev[:dev_length*i]+traindev[dev_length*(i+1):]+label_examples))
                 return (trains, devs, cls(text_field, label_field, examples=test))
 
             else:
-                return (cls(text_field, label_field, examples=traindev[:dev_index]),
+                return (cls(text_field, label_field, examples=traindev[:dev_index]+label_examples),
                     cls(text_field, label_field, examples=traindev[dev_index:]),
                     cls(text_field, label_field, examples=test))
 
