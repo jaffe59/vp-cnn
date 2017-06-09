@@ -15,9 +15,17 @@ import numpy as np
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
 parser.add_argument('-lr', type=float, default=1.0, help='initial learning rate [default: 1.0]') # 1e-3
+parser.add_argument('-word-lr', type=float, default=1.0, help='initial learning rate [default: 1.0]') # 1e-3
+parser.add_argument('-char-lr', type=float, default=1.0, help='initial learning rate [default: 1.0]') # 1e-3
 parser.add_argument('-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]') # 1e-6
+parser.add_argument('-word-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]') # 1e-6
+parser.add_argument('-char-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]') # 1e-6
 parser.add_argument('-epochs', type=int, default=25, help='number of epochs for train [default: 25]')
+parser.add_argument('-word-epochs', type=int, default=25, help='number of epochs for train [default: 25]')
+parser.add_argument('-char-epochs', type=int, default=25, help='number of epochs for train [default: 25]')
 parser.add_argument('-batch-size', type=int, default=50, help='batch size for training [default: 50]')
+parser.add_argument('-word-batch-size', type=int, default=50, help='batch size for training [default: 50]')
+parser.add_argument('-char-batch-size', type=int, default=50, help='batch size for training [default: 50]')
 parser.add_argument('-log-interval', type=int, default=1,
                     help='how many steps to wait before logging training status [default: 1]')
 parser.add_argument('-log-file', type=str, default=datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + 'result.txt',
@@ -33,10 +41,16 @@ parser.add_argument('-save-dir', type=str, default='snapshot', help='where to sa
 parser.add_argument('-shuffle', action='store_true', default=True, help='shuffle the data every epoch')
 # model
 parser.add_argument('-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
+parser.add_argument('-char-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
+parser.add_argument('-word-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
 parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
+parser.add_argument('-word-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
+parser.add_argument('-char-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
 parser.add_argument('-char-embed-dim', type=int, default=128, help='number of char embedding dimension [default: 128]')
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
+parser.add_argument('-word-kernel-num', type=int, default=100, help='number of each kind of kernel')
+parser.add_argument('-char-kernel-num', type=int, default=100, help='number of each kind of kernel')
 # parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
 parser.add_argument('-char-kernel-sizes', type=str, default='3,4,5',
                     help='comma-separated kernel size to use for char convolution')
@@ -57,8 +71,9 @@ parser.add_argument('-word-vector', type=str, default='w2v',
                     help="use of vectors [default: w2v. options: 'glove' or 'w2v']")
 parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
-parser.add_argument('-optimizer', type=str, default='adadelta',
-                    help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
+parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
+parser.add_argument('-word-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
+parser.add_argument('-char-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
 parser.add_argument('-fine-tune', action='store_true', default=False,
                     help='whether to fine tune the final ensembled model')
 parser.add_argument('-ortho-init', action='store_true', default=False,
@@ -194,7 +209,7 @@ for xfold in range(args.xfolds):
     # check_vocab(word_field)
     # print(label_field.vocab.itos)
 
-    args.embed_num = len(text_field.vocab)
+    
     args.class_num = 359
     args.cuda = args.yes_cuda and torch.cuda.is_available()  # ; del args.no_cuda
     if update_args == True:
@@ -209,6 +224,20 @@ for xfold in range(args.xfolds):
         print("\t{}={}".format(attr.upper(), value), file=log_file_handle)
 
     # char CNN training and dev
+    args.embed_num = len(text_field.vocab)
+    args.lr = args.char_lr
+    args.l2 = args.char_l2
+    args.epochs = args.char_epochs
+    args.batch_size = args.char_batch_size
+    args.dropout = args.char_dropout
+    args.max_norm = args.char_max_norm
+    args.kernel_num = args.char_kernel_num
+    args.optimizer = args.char_optimizer
+
+    print("\nParameters:")
+    for attr, value in sorted(args.__dict__.items()):
+        print("  {}={}".format(attr.upper(), value))
+
     if args.snapshot is None and args.num_experts == 0:
         char_cnn = model.CNN_Text(args, 'char')
     elif args.snapshot is None and args.num_experts > 0:
@@ -240,6 +269,19 @@ for xfold in range(args.xfolds):
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
+    args.lr = args.word_lr
+    args.l2 = args.word_l2
+    args.epochs = args.word_epochs
+    args.batch_size = args.word_batch_size
+    args.dropout = args.word_dropout
+    args.max_norm = args.word_max_norm
+    args.kernel_num = args.word_kernel_num
+    args.optimizer = args.word_optimizer
+
+    print("\nParameters:")
+    for attr, value in sorted(args.__dict__.items()):
+        print("  {}={}".format(attr.upper(), value))
+
     if update_args == True:
         # args.kernel_sizes = [int(k) for k in args.kernel_sizes.split(',')]
         args.word_kernel_sizes = [int(k) for k in args.word_kernel_sizes.split(',')]
