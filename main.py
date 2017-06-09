@@ -46,16 +46,14 @@ parser.add_argument('-word-dropout', type=float, default=0.5, help='the probabil
 parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
 parser.add_argument('-word-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
 parser.add_argument('-char-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
-parser.add_argument('-char-embed-dim', type=int, default=128, help='number of char embedding dimension [default: 128]')
+parser.add_argument('-char-embed-dim', type=int, default=16, help='number of char embedding dimension [default: 128]')
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
 parser.add_argument('-word-kernel-num', type=int, default=100, help='number of each kind of kernel')
-parser.add_argument('-char-kernel-num', type=int, default=100, help='number of each kind of kernel')
+parser.add_argument('-char-kernel-num', type=int, default=400, help='number of each kind of kernel')
 # parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
-parser.add_argument('-char-kernel-sizes', type=str, default='3,4,5',
-                    help='comma-separated kernel size to use for char convolution')
-parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5',
-                    help='comma-separated kernel size to use for word convolution')
+parser.add_argument('-char-kernel-sizes', type=str, default='2,3,4,5,6', help='comma-separated kernel size to use for char convolution')
+parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for word convolution')
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
 
 # device
@@ -201,11 +199,11 @@ for xfold in range(args.xfolds):
     train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, num_experts=args.num_experts,
                                          device=args.device, repeat=False, sort=False
                                          , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
-    train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
-                                                        num_experts=args.num_experts, device=args.device,
-                                                        repeat=False, sort=False, wv_type=args.word_vector,
-                                                        wv_dim=args.word_embed_dim, wv_dir=args.emb_path,
-                                                        min_freq=args.min_freq)
+    #train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
+    #                                                    num_experts=args.num_experts, device=args.device,
+    #                                                    repeat=False, sort=False, wv_type=args.word_vector,
+    #                                                    wv_dim=args.word_embed_dim, wv_dir=args.emb_path,
+    #                                                    min_freq=args.min_freq)
     # check_vocab(word_field)
     # print(label_field.vocab.itos)
 
@@ -256,6 +254,7 @@ for xfold in range(args.xfolds):
         acc, char_cnn = train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
     char_dev_fold_accuracies.append(acc)
     print("Completed fold {0}. Accuracy on Dev: {1} for CHAR".format(xfold, acc), file=log_file_handle)
+    print("Completed fold {0}. Mean accuracy on Dev: {1} for CHAR".format(xfold, np.mean(acc)), file=log_file_handle)
     if args.eval_on_test:
         if args.num_experts > 0:
             result = train.ensemble_eval(test_iter, char_cnn, args, log_file_handle=log_file_handle)
@@ -265,6 +264,7 @@ for xfold in range(args.xfolds):
         print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
         print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
+    log_file_handle.flush()
     continue
 
     # Word CNN training and dev
@@ -358,22 +358,22 @@ for xfold in range(args.xfolds):
     log_file_handle.flush()
 
 print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_dev_fold_accuracies), np.std(char_dev_fold_accuracies)))
-print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)))
-print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)))
+#print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)))
+#print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)))
 print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_dev_fold_accuracies), np.std(char_dev_fold_accuracies)), file=log_file_handle)
-print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)),
-      file=log_file_handle)
-print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)), file=log_file_handle)
+#print("WORD mean accuracy is {}, std is {}".format(np.mean(word_dev_fold_accuracies), np.std(word_dev_fold_accuracies)),
+#      file=log_file_handle)
+#print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_dev_fold_accuracies), np.std(ensemble_dev_fold_accuracies)), file=log_file_handle)
 
 if char_test_fold_accuracies or word_test_fold_accuracies:
     print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)))
-    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies),
-                                                       np.std(word_test_fold_accuracies)))
-    print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)))
+#    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies),
+#                                                       np.std(word_test_fold_accuracies)))
+#    print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)))
 
     print("CHAR mean accuracy is {}, std is {}".format(np.mean(char_test_fold_accuracies), np.std(char_test_fold_accuracies)), file=log_file_handle)
-    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies),
-                                                       np.std(word_test_fold_accuracies)), file=log_file_handle)
-    print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
+#    print("WORD mean accuracy is {}, std is {}".format(np.mean(word_test_fold_accuracies),
+#                                                       np.std(word_test_fold_accuracies)), file=log_file_handle)
+#    print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
 
 log_file_handle.close()
