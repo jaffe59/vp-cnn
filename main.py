@@ -43,6 +43,7 @@ parser.add_argument('-char-kernel-sizes', type=str, default='3,4,5',
 parser.add_argument('-word-kernel-sizes', type=str, default='3,4,5',
                     help='comma-separated kernel size to use for word convolution')
 parser.add_argument('-static', action='store_true', default=False, help='fix the embedding')
+
 # device
 parser.add_argument('-device', type=int, default=0, help='device to use for iterate data, -1 mean cpu [default: -1]')
 parser.add_argument('-yes-cuda', action='store_true', default=True, help='disable the gpu')
