@@ -220,7 +220,7 @@ for xfold in range(args.xfolds):
             exit()
     if args.num_experts > 0:
         acc, char_cnn = train.ensemble_train(train_iter, dev_iter, char_cnn, args,
-                                             log_file_handle=log_file_handle)
+                                             log_file_handle=log_file_handle, always_norm=False)
     else:
         acc, char_cnn = train.train(train_iter, dev_iter, char_cnn, args, log_file_handle=log_file_handle)
     char_dev_fold_accuracies.append(acc)

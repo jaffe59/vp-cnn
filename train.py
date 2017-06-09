@@ -113,7 +113,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
         print('Evaluation ensemble {} - acc: {:.4f}%({}/{})'.format(args.ensemble.upper(), accuracy, corrects, size), file=kwargs['log_file_handle'])
     return accuracy
 
-def train(train_iter, dev_iter, model, args, **kwargs):
+def train(train_iter, dev_iter, model, args, always_norm=True):
     if args.cuda:
         model.cuda()
     if args.optimizer == 'adam':
@@ -147,9 +147,12 @@ def train(train_iter, dev_iter, model, args, **kwargs):
 
             # max norm constraint
             if args.max_norm > 0:
-                for row in model.fc1.weight.data:
-                    norm = row.norm() + 1e-7
-                    row.div_(norm).mul_(args.max_norm)
+                if always_norm:
+                    for row in model.fc1.weight.data:
+                        norm = row.norm() + 1e-7
+                        row.div_(norm).mul_(args.max_norm)
+                else:
+                    model.fc1.weight.data.renorm_(2, 0, args.max_norm)
 
             steps += 1
             if steps % args.log_interval == 0:
