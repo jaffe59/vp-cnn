@@ -264,8 +264,9 @@ for xfold in range(args.xfolds):
         print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result))
         print("Completed fold {0}. Accuracy on Test: {1} for CHAR".format(xfold, result), file=log_file_handle)
 
+
     log_file_handle.flush()
-    continue
+    #continue
 
     # Word CNN training and dev
     args.embed_num = len(word_field.vocab)
