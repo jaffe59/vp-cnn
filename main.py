@@ -14,7 +14,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
-parser.add_argument('-lr', type=float, default=0.001, help='initial learning rate [default: 1.0]')
+parser.add_argument('-lr', type=float, default=1.0, help='initial learning rate [default: 1.0]')
 parser.add_argument('-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]')
 parser.add_argument('-epochs', type=int, default=25, help='number of epochs for train [default: 25]')
 parser.add_argument('-batch-size', type=int, default=50, help='batch size for training [default: 50]')
