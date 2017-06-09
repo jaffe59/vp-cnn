@@ -14,8 +14,8 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
-parser.add_argument('-lr', type=float, default=1.0, help='initial learning rate [default: 1.0]')
-parser.add_argument('-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]')
+parser.add_argument('-lr', type=float, default=1.0, help='initial learning rate [default: 1.0]') # 1e-3
+parser.add_argument('-l2', type=float, default=0.0, help='l2 regularization strength [default: 0.0]') # 1e-6
 parser.add_argument('-epochs', type=int, default=25, help='number of epochs for train [default: 25]')
 parser.add_argument('-batch-size', type=int, default=50, help='batch size for training [default: 50]')
 parser.add_argument('-log-interval', type=int, default=1,
@@ -33,7 +33,7 @@ parser.add_argument('-save-dir', type=str, default='snapshot', help='where to sa
 parser.add_argument('-shuffle', action='store_true', default=True, help='shuffle the data every epoch')
 # model
 parser.add_argument('-dropout', type=float, default=0.5, help='the probability for dropout [default: 0.5]')
-parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]')
+parser.add_argument('-max-norm', type=float, default=3.0, help='l2 constraint of parameters [default: 3.0]') # 0.0
 parser.add_argument('-char-embed-dim', type=int, default=128, help='number of char embedding dimension [default: 128]')
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
@@ -197,7 +197,8 @@ for xfold in range(args.xfolds):
     args.class_num = 359
     args.cuda = args.yes_cuda and torch.cuda.is_available()  # ; del args.no_cuda
     if update_args == True:
-        args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
+        if isinstance(args.char_kernel_sizes,str):
+            args.char_kernel_sizes = [int(k) for k in args.char_kernel_sizes.split(',')]
         args.save_dir = os.path.join(args.save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
     else:
         args.save_dir = os.path.join(orig_save_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), 'CHAR')
