@@ -9,7 +9,7 @@ import torch
 class VP(data.Dataset):
     """modeled after Shawn1993 github user's Pytorch implementation of Kim2014 - cnn for text categorization"""
 
-    filename = "wilkins_corrected.tsv"
+    filename = "wilkins_corrected.shuffled.51.txt"
 
     @staticmethod
     def sort_key(ex):

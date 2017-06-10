@@ -1,6 +1,7 @@
 import math
 import torch
 import scipy.stats as stats
+import ast
 def calc_indices(args):
     #calc fold indices
     indices = []
@@ -26,18 +27,23 @@ def read_in_dialogues(dialogue_file):
     dialogue_indices = []
     dialogue_index = -1
     turn_index = -1
-    with open(dialogue_file) as l:
-        for line in l:
-            if line.startswith('#S'):
-                dialogue_index += 1
-                turn_index = 0
-            else:
-                dialogue_indices.append((dialogue_index, turn_index))
-                turn_index += 1
+    if dialogue_file.endswith('indices'):
+        with open(dialogue_file) as l:
+            for line in l:
+                dialogue_indices.append(ast.literal_eval(line.strip()))
+    else:
+        with open(dialogue_file) as l:
+            for line in l:
+                if line.startswith('#S'):
+                    dialogue_index += 1
+                    turn_index = 0
+                else:
+                    dialogue_indices.append((dialogue_index, turn_index))
+                    turn_index += 1
     return dialogue_indices
 
 def read_in_chat(chat_file, dialogues):
-    chats = [0] * len(dialogues)
+    chats = {}
     with open(chat_file) as c:
         for line in c:
             if line.startswith('dia'):
@@ -46,7 +52,7 @@ def read_in_chat(chat_file, dialogues):
                 line = line.strip().split(',')
                 this_index = (int(line[0]), int(line[1]))
                 # print(dialogues)
-                chats[dialogues.index(this_index)] = (line[-2], line[-1])
+                chats[this_index] = (line[-2], line[-1])
     return chats
 
 def print_test_features(tensor, confidence, target, dialogue_indices, labels, indices, fold_id, chats, feature_file):
@@ -70,8 +76,8 @@ def print_test_features(tensor, confidence, target, dialogue_indices, labels, in
         item.append(probs[ind])
         item.append(stats.entropy(tensor[ind]))
         item.append(confidence[ind, predicted[ind]])
-        item.append(chats[item_id][0])
-        item.append(chats[item_id][1])
+        item.append(chats[(dialogue_index, turn_index)][0])
+        item.append(chats[(dialogue_index, turn_index)][1])
         print(','.join([str(x) for x in item]), file=feature_file)
 
 

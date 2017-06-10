@@ -193,7 +193,7 @@ update_args = True
 
 indices = calc_indices(args)
 labels = read_in_labels('labels.txt')
-dialogues = read_in_dialogues('corrected.tsv')
+dialogues = read_in_dialogues('wilkins_corrected.shuffled.51.indices')
 chats = read_in_chat('stats.16mar2017.csv', dialogues)
 
 for xfold in range(args.xfolds):
