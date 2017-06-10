@@ -19,7 +19,7 @@ def read_in_labels(labels_file):
         for line in l:
             line = line.strip().split("\t")
             print(line)
-            labels.append('_'.join(line[1]))
+            labels.append('_'.join(line[1].split(' ')))
     return labels
 
 def read_in_dialogues(dialogue_file):
@@ -64,7 +64,7 @@ def print_test_features(tensor, confidence, target, dialogue_indices, labels, in
         item.append(dialogue_index)
         item.append(turn_index)
         item.append(labels[predicted[ind]])
-        item.append(str(val))
+        item.append(str(bool(val)))
         item.append(probs[ind])
         item.append(stats.entropy(tensor[ind]))
         item.append(confidence[ind, predicted[ind]])

@@ -40,6 +40,7 @@ def ensemble_predict(batch, models, args, **kwargs):
                 total_logit.data[index,top_index] += 1
     for model in models:
         model.train()
+    total_confidence /= len(models)
     return total_logit, total_confidence
 
 def ensemble_train(trains, devs, models, args, **kwargs):
