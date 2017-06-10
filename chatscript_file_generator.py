@@ -36,15 +36,16 @@ def read_in_dialogues(dialogue_file):
                 dialogue_indices.append((dialogue_index, turn_index))
     return dialogue_indices
 
-def read_in_chat(chat_file):
-    chats = []
+def read_in_chat(chat_file, dialogues):
+    chats = [0] * len(dialogues)
     with open(chat_file) as c:
         for line in c:
             if line.startswith('dia'):
                 continue
             else:
                 line = line.strip().split(',')
-                chats.append((line[-2], line[-1]))
+                this_index = (int(line[0]), int(line[1]))
+                chats[dialogues.index(this_index)] = (line[-2], line[-1])
     return chats
 
 def print_test_features(tensor, confidence, target, dialogue_indices, labels, indices, fold_id, chats, feature_file):
