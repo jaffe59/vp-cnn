@@ -18,12 +18,19 @@ def ensemble_predict(batch, models, args, **kwargs):
         logits.append(logit)
         confidences.append(confidence)
     total_logit = autograd.Variable(torch.zeros(logits[0].size()))
+    average_probs = autograd.Variable(torch.zeros(logits[0].size()))
+    average_logprobs = autograd.Variable(torch.zeros(logits[0].size()))
     total_confidence = autograd.Variable(torch.zeros(confidences[0].size()))
     if args.cuda:
         total_logit = total_logit.cuda()
         total_confidence = total_confidence.cuda()
+
+    # calc confidence scores
     for confidence in confidences:
         total_confidence += confidence
+    total_confidence /= len(models)
+
+    # calc ensembled prediction
     if args.ensemble == 'poe':
         for some_logit in logits:
             total_logit += some_logit
@@ -38,10 +45,19 @@ def ensemble_predict(batch, models, args, **kwargs):
             # print(indices[:10])
             for index, top_index in enumerate(indices):
                 total_logit.data[index,top_index] += 1
+    # calc averaged probs
+    for some_logit in logits:
+        average_probs += torch.exp(some_logit)
+    average_probs /= len(models)
+    #calc averaged logprobs
+    for some_logit in logits:
+        average_logprobs += some_logit
+    average_logprobs /= len(models)
+    # put models back in train mode
     for model in models:
         model.train()
-    total_confidence /= len(models)
-    return total_logit, total_confidence
+
+    return total_logit, (total_confidence, average_probs, average_logprobs)
 
 def ensemble_train(trains, devs, models, args, **kwargs):
     print('entering ensemble training:')
@@ -346,9 +362,8 @@ def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensem
         else:
             char_tensors = (char_feature, char_target)
             word_tensors = (word_feature, word_target)
-            char_output, char_confidence = ensemble_predict(char_tensors, char_model, args)
-            word_output, word_confidence = ensemble_predict(word_tensors, word_model, args)
-
+            char_output, (char_confidence, char_ave_probs, char_ave_logprobs) = ensemble_predict(char_tensors, char_model, args)
+            word_output, (word_confidence, word_ave_probs, word_ave_logprobs) = ensemble_predict(word_tensors, word_model, args)
 
         logit = last_ensemble_model((char_output, word_output))
         loss = F.nll_loss(logit, char_target, size_average=False)
@@ -360,7 +375,7 @@ def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensem
         corrects += (torch.max(logit, 1)
                      [1].view(char_target.size()).data == char_target.data).sum()
         if 'prediction_file_handle' in kwargs:
-            print_test_features(logit, char_confidence+word_confidence, char_target, kwargs['dialogues'], kwargs['labels'], kwargs['indices'],
+            print_test_features(logit, char_confidence+word_confidence,char_ave_probs+word_ave_logprobs, char_ave_logprobs+word_ave_logprobs, char_target, kwargs['dialogues'], kwargs['labels'], kwargs['indices'],
                                 kwargs['fold_id'], kwargs['chats'], kwargs['prediction_file_handle'])
     size = len(char_data.data())
     avg_loss = avg_loss / size
@@ -377,5 +392,3 @@ def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensem
                                                                            size), file=kwargs['log_file_handle'])
     return accuracy
 
-def print_predictions(tensor, file_handle):
-    tensor = tensor.numpy()

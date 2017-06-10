@@ -55,14 +55,16 @@ def read_in_chat(chat_file, dialogues):
                 chats[this_index] = (line[-2], line[-1])
     return chats
 
-def print_test_features(tensor, confidence, target, dialogue_indices, labels, indices, fold_id, chats, feature_file):
+def print_test_features(tensor, confidence, ave_probs, ave_logprobs, target, dialogue_indices, labels, indices, fold_id, chats, feature_file):
     # dial_id, turn_id, predicted_label, correct_bool, prob, entropy, confidence, chat_prob, chat_rank
     tensor = torch.exp(tensor)
     probs, predicted = torch.max(tensor, 1)
     predicted = predicted.view(target.size()).data
     probs = probs.view(target.size()).data
     corrects = predicted == target.data
-    confidence = confidence.squeeze().data.cpu().numpy()
+    confidence = confidence.squeeze().data.cpu().numpy() / 2
+    ave_logprobs = ave_logprobs.squeeze().data.cpu().numpy() / 2
+    ave_probs = ave_probs.squeeze().data.cpu().numpy() / 2
     tensor = tensor.squeeze().data.cpu().numpy()
     start_id, end_id = indices[fold_id]
     for ind, val in enumerate(corrects):
@@ -76,6 +78,8 @@ def print_test_features(tensor, confidence, target, dialogue_indices, labels, in
         item.append(probs[ind])
         item.append(stats.entropy(tensor[ind]))
         item.append(confidence[ind, predicted[ind]])
+        item.append(ave_probs[ind, predicted[ind]])
+        item.append(ave_logprobs[ind, predicted[ind]])
         item.append(chats[(dialogue_index, turn_index)][0])
         item.append(chats[(dialogue_index, turn_index)][1])
         print(','.join([str(x) for x in item]), file=feature_file)
