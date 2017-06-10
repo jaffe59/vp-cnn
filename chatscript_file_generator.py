@@ -16,7 +16,7 @@ def calc_indices(args):
 def read_in_labels(labels_file):
     labels = []
     with open(labels_file) as l:
-        for line in labels_file:
+        for line in l:
             line = line.strip().split("\t")
             print(line)
             labels.append('_'.join(line[1]))
@@ -27,7 +27,7 @@ def read_in_dialogues(dialogue_file):
     dialogue_index = -1
     turn_index = -1
     with open(dialogue_file) as l:
-        for line in dialogue_file:
+        for line in l:
             if line.starswith('#S'):
                 dialogue_index += 1
                 turn_index = 0
