@@ -366,7 +366,8 @@ def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensem
             word_tensors = (word_feature, word_target)
             char_output, (char_confidence, char_ave_probs, char_ave_logprobs) = ensemble_predict(char_tensors, char_model, args)
             word_output, (word_confidence, word_ave_probs, word_ave_logprobs) = ensemble_predict(word_tensors, word_model, args)
-
+        print(char_output)
+        print(word_output)
         logit = last_ensemble_model((char_output, word_output))
         loss = F.nll_loss(logit, char_target, size_average=False)
 
