@@ -61,7 +61,7 @@ def print_test_features(tensor, confidence, target, dialogue_indices, labels, in
         item = []
         item_id = start_id+ind
         dialogue_index, turn_index = dialogue_indices[item_id]
-        item.append(dialogue_indices)
+        item.append(dialogue_index)
         item.append(turn_index)
         item.append(labels[predicted[ind]])
         item.append(str(val))
