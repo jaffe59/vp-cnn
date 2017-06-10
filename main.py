@@ -50,7 +50,7 @@ parser.add_argument('-char-max-norm', type=float, default=3.0, help='l2 constrai
 parser.add_argument('-char-embed-dim', type=int, default=16, help='number of char embedding dimension [default: 128]')
 parser.add_argument('-word-embed-dim', type=int, default=300, help='number of word embedding dimension [default: 300]')
 parser.add_argument('-kernel-num', type=int, default=100, help='number of each kind of kernel')
-parser.add_argument('-word-kernel-num', type=int, default=100, help='number of each kind of kernel')
+parser.add_argument('-word-kernel-num', type=int, default=300, help='number of each kind of kernel')
 parser.add_argument('-char-kernel-num', type=int, default=400, help='number of each kind of kernel')
 # parser.add_argument('-kernel-sizes', type=str, default='3,4,5', help='comma-separated kernel size to use for convolution')
 parser.add_argument('-char-kernel-sizes', type=str, default='2,3,4,5,6', help='comma-separated kernel size to use for char convolution')
@@ -81,6 +81,7 @@ parser.add_argument('-ensemble', type=str, default='poe',
                     help='ensemble methods [default: poe. options: poe, avg, vot]')
 parser.add_argument('-num-experts', type=int, default=5, help='number of experts if poe is enabled [default: 5]')
 parser.add_argument('-prediction-file-handle', type=str, default='predictions.txt', help='the file to output the test predictions')
+parser.add_argument('-always-norm', action='store_true', default=True, help='always max norm the weights')
 args = parser.parse_args()
 
 prediction_file_handle = open(args.prediction_file_handle, 'w')
