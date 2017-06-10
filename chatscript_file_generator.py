@@ -32,8 +32,8 @@ def read_in_dialogues(dialogue_file):
                 dialogue_index += 1
                 turn_index = 0
             else:
-                turn_index += 1
                 dialogue_indices.append((dialogue_index, turn_index))
+                turn_index += 1
     return dialogue_indices
 
 def read_in_chat(chat_file, dialogues):
