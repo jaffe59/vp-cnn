@@ -44,7 +44,7 @@ def read_in_chat(chat_file, dialogues):
                 continue
             else:
                 line = line.strip().split(',')
-                this_index = (int(line[0]), int(line[1]))
+                this_index = (line[0], line[1])
                 chats[dialogues.index(this_index)] = (line[-2], line[-1])
     return chats
 
