@@ -4,7 +4,7 @@ import scipy.stats as stats
 def calc_indices(args):
     #calc fold indices
     indices = []
-    numfolds = args.num_folds
+    numfolds = args.xfolds
     len_dataset = 4330
     fold_size = math.ceil(len_dataset/numfolds)
     for fold in range(numfolds):
