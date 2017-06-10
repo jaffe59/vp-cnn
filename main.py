@@ -388,4 +388,4 @@ if char_test_fold_accuracies or word_test_fold_accuracies:
     print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
 
 log_file_handle.close()
-args.prediction_file_handle.close()
+prediction_file_handle.close()
