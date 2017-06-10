@@ -19,7 +19,6 @@ def read_in_labels(labels_file):
     with open(labels_file) as l:
         for line in l:
             line = line.strip().split("\t")
-            print(line)
             labels.append('_'.join(line[1].split(' ')))
     return labels
 
@@ -76,7 +75,7 @@ def print_test_features(tensor, confidence, ave_probs, ave_logprobs, target, dia
         item.append(labels[predicted[ind]])
         item.append(str(bool(val)))
         item.append(probs[ind])
-        if probs[ind] < 0.1:
+        if probs[ind] < 0.0:
             print(tensor[ind])
             print(probs[ind], predicted[ind])
             raise Exception
