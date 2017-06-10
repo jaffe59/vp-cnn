@@ -60,7 +60,7 @@ class CNN_Text(nn.Module):
 
     def forward(self, x):
         x = self.confidence(x)
-        logit = F.log_softmax(self.fc1(x)) # (N,C)
+        logit = F.log_softmax(x) # (N,C)
         return logit
 
     def confidence(self, x):
