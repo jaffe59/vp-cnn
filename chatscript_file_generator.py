@@ -70,7 +70,7 @@ def print_test_features(tensor, confidence, target, dialogue_indices, labels, in
         item.append(confidence[ind, predicted[ind]])
         item.append(chats[item_id][0])
         item.append(chats[item_id][1])
-        print(','.join(item), file=feature_file)
+        print(','.join([str(x) for x in item]), file=feature_file)
 
 
 
