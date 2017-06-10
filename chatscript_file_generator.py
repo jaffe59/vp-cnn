@@ -28,7 +28,7 @@ def read_in_dialogues(dialogue_file):
     turn_index = -1
     with open(dialogue_file) as l:
         for line in l:
-            if line.starswith('#S'):
+            if line.startswith('#S'):
                 dialogue_index += 1
                 turn_index = 0
             else:
@@ -40,7 +40,7 @@ def read_in_chat(chat_file):
     chats = []
     with open(chat_file) as c:
         for line in c:
-            if line.starswith('dia'):
+            if line.startswith('dia'):
                 continue
             else:
                 line = line.strip().split(',')
