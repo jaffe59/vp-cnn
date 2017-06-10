@@ -24,6 +24,8 @@ def ensemble_predict(batch, models, args, **kwargs):
     if args.cuda:
         total_logit = total_logit.cuda()
         total_confidence = total_confidence.cuda()
+        average_probs = average_probs.cuda()
+        average_logprobs = average_logprobs.cuda()
 
     # calc confidence scores
     for confidence in confidences:
