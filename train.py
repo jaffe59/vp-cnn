@@ -155,7 +155,7 @@ def train(train_iter, dev_iter, model, args, **kwargs):
 
             # max norm constraint
             if args.max_norm > 0:
-                if args.always_norm:
+                if not args.no_always_norm:
                     for row in model.fc1.weight.data:
                         norm = row.norm() + 1e-7
                         row.div_(norm).mul_(args.max_norm)

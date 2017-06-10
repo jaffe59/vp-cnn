@@ -81,7 +81,7 @@ parser.add_argument('-ensemble', type=str, default='poe',
                     help='ensemble methods [default: poe. options: poe, avg, vot]')
 parser.add_argument('-num-experts', type=int, default=5, help='number of experts if poe is enabled [default: 5]')
 parser.add_argument('-prediction-file-handle', type=str, default='predictions.txt', help='the file to output the test predictions')
-parser.add_argument('-always-norm', action='store_true', default=True, help='always max norm the weights')
+parser.add_argument('-no-always-norm', action='store_true', default=False, help='always max norm the weights')
 args = parser.parse_args()
 
 prediction_file_handle = open(args.prediction_file_handle, 'w')
