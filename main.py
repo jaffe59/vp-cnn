@@ -85,7 +85,7 @@ parser.add_argument('-no-always-norm', action='store_true', default=False, help=
 args = parser.parse_args()
 
 prediction_file_handle = open(args.prediction_file_handle, 'w')
-print('dial_id,turn_id,predicted,correct,prob,entropy,variance,confidence,ave_prob,ave_logporb,chatscript_prob,chatscript_rank', file=prediction_file_handle)
+print('dial_id,turn_id,predicted,correct,prob,entropy,confidence,ave_prob,ave_logporb,chatscript_prob,chatscript_rank', file=prediction_file_handle)
 if args.word_vector == 'glove':
     args.word_vector = 'glove.6B'
 elif args.word_vector == 'w2v':
