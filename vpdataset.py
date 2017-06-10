@@ -85,11 +85,11 @@ class VP(data.Dataset):
                     cls(text_field, label_field, examples=examples[dev_index:]))
         else:
             #get all folds
-            fold_size = math.floor(len(examples)/numfolds)
+            fold_size = math.ceil(len(examples)/numfolds)
             folds = []
             for fold in range(numfolds):
                 startidx = fold*fold_size
-                endidx = startidx+fold_size
+                endidx = startidx+fold_size if startidx+fold_size < len(examples) else len(examples)
                 folds += [examples[startidx:endidx]]
 
             #take all folds except foldid as training/dev

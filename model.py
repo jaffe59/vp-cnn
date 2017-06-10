@@ -59,16 +59,21 @@ class CNN_Text(nn.Module):
         return x
 
     def forward(self, x):
-        x = self.embed(x) # (N,W,D)
-        
+        x = self.confidence(x)
+        logit = F.log_softmax(self.fc1(x)) # (N,C)
+        return logit
+
+    def confidence(self, x):
+        x = self.embed(x)  # (N,W,D)
+
         if self.args.static and self.args.word_vector:
             x = autograd.Variable(x.data)
 
-        x = x.unsqueeze(1) # (N,Ci,W,D)
-        x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1] #[(N,Co,W), ...]*len(Ks)
+        x = x.unsqueeze(1)  # (N,Ci,W,D)
+        x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1]  # [(N,Co,W), ...]*len(Ks)
         # print([x_p.size() for x_p in x])
 
-        x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x] #[(N,Co), ...]*len(Ks)
+        x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N,Co), ...]*len(Ks)
         x = torch.cat(x, 1)
         '''
         x1 = self.conv_and_pool(x,self.conv13) #(N,Co)
@@ -76,9 +81,9 @@ class CNN_Text(nn.Module):
         x3 = self.conv_and_pool(x,self.conv15) #(N,Co)
         x = torch.cat((x1, x2, x3), 1) # (N,len(Ks)*Co)
         '''
-        x = self.dropout(x) # (N,len(Ks)*Co)
-        logit = F.log_softmax(self.fc1(x)) # (N,C)
-        return logit
+        x = self.dropout(x)  # (N,len(Ks)*Co)
+        linear_out = self.fc1(x)
+        return linear_out
 
 class SimpleLogistic(nn.Module):
     def __init__(self, args):

@@ -11,6 +11,7 @@ import mydatasets
 import pdb
 import vpdataset
 import numpy as np
+from chatscript_file_generator import *
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
@@ -79,8 +80,10 @@ parser.add_argument('-ortho-init', action='store_true', default=False,
 parser.add_argument('-ensemble', type=str, default='poe',
                     help='ensemble methods [default: poe. options: poe, avg, vot]')
 parser.add_argument('-num-experts', type=int, default=5, help='number of experts if poe is enabled [default: 5]')
+parser.add_argument('-prediction-file-handle', type=str, default='predictions.txt', help='the file to output the test predictions')
 args = parser.parse_args()
 
+args.prediction_file_handle = open(args.prediction_file_handle, 'w')
 if args.word_vector == 'glove':
     args.word_vector = 'glove.6B'
 elif args.word_vector == 'w2v':
@@ -185,6 +188,11 @@ word_test_fold_accuracies = []
 ensemble_test_fold_accuracies = []
 orig_save_dir = args.save_dir
 update_args = True
+
+indices = calc_indices(args)
+labels = read_in_labels('labels.txt')
+chats = read_in_chat('stats.16mar2017.csv')
+dialogues = read_in_dialogues('corrected.tsv')
 
 for xfold in range(args.xfolds):
     print("Fold {0}".format(xfold))
@@ -351,7 +359,8 @@ for xfold in range(args.xfolds):
     print("Completed fold {0}. Accuracy on Dev: {1} for LOGIT".format(xfold, acc), file=log_file_handle)
     if args.eval_on_test:
         result = train.eval_final_ensemble(test_iter, test_iter_word, char_cnn, word_cnn, final_logit, args,
-                                           log_file_handle=log_file_handle)
+                                           log_file_handle=log_file_handle, prediction_file_handle=args.prediction_file_handle,
+                                           labels=labels, chats=chats, dialogues=dialogues, indices=indices, fold_id=xfold)
         ensemble_test_fold_accuracies.append(result)
 
         print("Completed fold {0}. Accuracy on Test: {1} for LOGIT".format(xfold, result))
@@ -379,3 +388,4 @@ if char_test_fold_accuracies or word_test_fold_accuracies:
     print("LOGIT mean accuracy is {}, std is {}".format(np.mean(ensemble_test_fold_accuracies), np.std(ensemble_test_fold_accuracies)), file=log_file_handle)
 
 log_file_handle.close()
+args.prediction_file_handle.close()
