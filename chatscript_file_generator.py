@@ -76,6 +76,10 @@ def print_test_features(tensor, confidence, ave_probs, ave_logprobs, target, dia
         item.append(labels[predicted[ind]])
         item.append(str(bool(val)))
         item.append(probs[ind])
+        if probs[ind] < 0.1:
+            print(tensor[ind])
+            print(probs[ind], predicted[ind])
+            raise Exception
         item.append(stats.entropy(tensor[ind]))
         item.append(confidence[ind, predicted[ind]])
         item.append(ave_probs[ind, predicted[ind]])
