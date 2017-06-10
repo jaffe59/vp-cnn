@@ -18,6 +18,7 @@ def read_in_labels(labels_file):
     with open(labels_file) as l:
         for line in labels_file:
             line = line.strip().split("\t")
+            print(line)
             labels.append('_'.join(line[1]))
     return labels
 
