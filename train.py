@@ -19,11 +19,11 @@ def ensemble_predict(batch, models, args, **kwargs):
         confidences.append(confidence)
     total_logit = autograd.Variable(torch.zeros(logits[0].size()))
     total_confidence = autograd.Variable(torch.zeros(confidences[0].size()))
-    for confidence in confidences:
-        total_confidence += confidence
     if args.cuda:
         total_logit = total_logit.cuda()
         total_confidence = total_confidence.cuda()
+    for confidence in confidences:
+        total_confidence += confidence
     if args.ensemble == 'poe':
         for some_logit in logits:
             total_logit += some_logit
