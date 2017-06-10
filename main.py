@@ -191,8 +191,8 @@ update_args = True
 
 indices = calc_indices(args)
 labels = read_in_labels('labels.txt')
-chats = read_in_chat('stats.16mar2017.csv')
 dialogues = read_in_dialogues('corrected.tsv')
+chats = read_in_chat('stats.16mar2017.csv', dialogues)
 
 for xfold in range(args.xfolds):
     print("Fold {0}".format(xfold))
