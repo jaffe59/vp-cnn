@@ -359,7 +359,7 @@ def eval_final_ensemble(char_data, word_data, char_model, word_model, last_ensem
         corrects += (torch.max(logit, 1)
                      [1].view(char_target.size()).data == char_target.data).sum()
         if 'prediction_file_handle' in kwargs:
-            print_test_features(logit, char_confidence+word_confidence, char_target, kwargs['dialogue'], kwargs['labels'], kwargs['indices'],
+            print_test_features(logit, char_confidence+word_confidence, char_target, kwargs['dialogues'], kwargs['labels'], kwargs['indices'],
                                 kwargs['fold_id'], kwargs['chats'], kwargs['prediction_file_handle'])
     size = len(char_data.data())
     avg_loss = avg_loss / size
