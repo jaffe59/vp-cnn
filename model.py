@@ -30,7 +30,7 @@ class CNN_Text(nn.Module):
         # print(self.embed.weight.data[100])
         # print(self.embed.weight.data.size())
         self.convs1 = nn.ModuleList([nn.Conv2d(Ci, Co, (K, D)) for K in Ks])
-        if char_or_word == 'word' or True:
+        if char_or_word == 'word':
             for layer in self.convs1:
                 if args.ortho_init == True:
                     init.orthogonal(layer.weight.data)
@@ -44,7 +44,7 @@ class CNN_Text(nn.Module):
         '''
         self.dropout = nn.Dropout(args.dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, C)
-        if char_or_word == 'word' or True:
+        if char_or_word == 'word':
             if args.ortho_init == True:
                 init.orthogonal(self.fc1.weight.data)
             else:
