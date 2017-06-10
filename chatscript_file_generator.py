@@ -54,8 +54,8 @@ def print_test_features(tensor, confidence, target, dialogue_indices, labels, in
     predicted = predicted.view(target.size()).data
     probs = probs.view(target.size()).data
     corrects = predicted == target.data
-    confidence = confidence.squeeze().numpy()
-    tensor = tensor.squeeze().numpy()
+    confidence = confidence.squeeze().data.cpu().numpy()
+    tensor = tensor.squeeze().data.cpu().numpy()
     start_id, end_id = indices[fold_id]
     for ind, val in enumerate(corrects):
         item = []
