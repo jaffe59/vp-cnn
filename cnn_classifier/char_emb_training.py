@@ -13,6 +13,7 @@ def characterfy_corpus(corpus):
     for line in f:
         line = line.strip()
         data.append(list(line))
+    print(data)
     return data
 
 def create_embeddings(data, size=16):
@@ -27,11 +28,12 @@ def printout_embeds(char_embs, char_embs_file):
         for word in char_embs.vocab:
             arr = np.array_str(char_embs[word])
             arr = arr[1:-1]
-            print(word+'\t'+arr, file=o)
+            print(word+' '+arr, file=o)
 
 
 if __name__ == '__main__':
     sent_file = sys.argv[1]
     char_embed_file = sys.argv[2]
-    char_embeddings = create_embeddings(sent_file)
+    data = characterfy_corpus(sent_file)
+    char_embeddings = create_embeddings(data)
     printout_embeds(char_embeddings, char_embed_file)
