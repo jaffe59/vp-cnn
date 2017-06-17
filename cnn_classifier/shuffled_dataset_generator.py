@@ -1,5 +1,9 @@
-from chatscript_file_generator import *
 import random
+
+from cnn_classifier.chatscript_file_generator import *
+
+
+# this standalone script is used to generate a shuffled dataset with its vocabulary.
 
 def shuffle_data(dataset_list, dialogues, shuffled_data_file, indices_file):
     len_dataset = len(dataset_list)

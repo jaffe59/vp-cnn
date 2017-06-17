@@ -1,17 +1,17 @@
 #! /usr/bin/env python
-import os
 import argparse
 import datetime
-import torch
+import os
+
+import model
+import mydatasets
+import numpy as np
 import torchtext.data as data
 import torchtext.datasets as datasets
-import model
 import train
-import mydatasets
-import pdb
 import vpdataset
-import numpy as np
-from chatscript_file_generator import *
+
+from cnn_classifier.chatscript_file_generator import *
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
@@ -67,7 +67,7 @@ parser.add_argument('-test', action='store_true', default=False, help='train or 
 parser.add_argument('-xfolds', type=int, default=10, help='number of folds for cross-validation')
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
 parser.add_argument('-word-vector', type=str, default='w2v',
-                    help="use of vectors [default: w2v. options: 'glove' or 'w2v']")
+                    help="use of vectors [default: w2v. options: 'glove' or 'w2v' or 'none]")
 parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
 parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")

@@ -2,6 +2,9 @@ import math
 import torch
 import scipy.stats as stats
 import ast
+
+# this script is used to generate results used to combine the classifier with chatscript
+
 def calc_indices(args):
     #calc fold indices
     indices = []

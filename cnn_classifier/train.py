@@ -1,10 +1,18 @@
-import os
 import sys
 import torch
 import torch.autograd as autograd
 import torch.nn.functional as F
 import copy
-from chatscript_file_generator import print_test_features
+from cnn_classifier.chatscript_file_generator import print_test_features
+import copy
+import sys
+
+import torch
+import torch.autograd as autograd
+import torch.nn.functional as F
+
+from cnn_classifier.chatscript_file_generator import print_test_features
+
 
 def ensemble_predict(batch, models, args, **kwargs):
     for model in models:
@@ -106,7 +114,7 @@ def ensemble_eval(data_iter, models, args, **kwargs):
             print('Evaluation model {} on test - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(index, avg_loss,
                                                                                accuracy,
                                                                                corrects,
-                                                                               size), file=kwargs['log_file_handle'])
+                                                                               size), file= kwargs['log_file_handle'] )
         logits.append(logit)
     total_logit = 0
     if args.ensemble == 'poe':
