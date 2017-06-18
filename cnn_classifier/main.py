@@ -11,7 +11,7 @@ import torchtext.datasets as datasets
 import train
 import vpdataset
 
-from cnn_classifier.chatscript_file_generator import *
+from chatscript_file_generator import *
 
 parser = argparse.ArgumentParser(description='CNN text classificer')
 # learning
