@@ -70,7 +70,7 @@ class VP(data.Dataset):
         if shuffle: random.shuffle(examples)
         fields = [('text', text_field), ('label', label_field)]
         label_examples = []
-        label_filename = 'labels.txt'
+        label_filename = 'data/labels.txt'
         with open(label_filename) as f:
             lines = f.readlines()
             # pdb.set_trace()
