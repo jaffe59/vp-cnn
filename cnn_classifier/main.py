@@ -101,7 +101,7 @@ else:
 if args.char_vector == 'none':
     args.char_vector = None
 elif args.char_vector == 'char.wiki':
-    if args.word_embed_dim != 16:
+    if args.char_embed_dim != 16:
         raise Exception("char has no other kind of vectors than 16")
 else:
     raise Exception("invalid char embedding name")
