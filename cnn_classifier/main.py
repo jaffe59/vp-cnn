@@ -68,7 +68,11 @@ parser.add_argument('-xfolds', type=int, default=10, help='number of folds for c
 parser.add_argument('-layer-num', type=int, default=2, help='the number of layers in the final MLP')
 parser.add_argument('-word-vector', type=str, default='w2v',
                     help="use of vectors [default: w2v. options: 'glove' or 'w2v' or 'none]")
-parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the w2v file")
+parser.add_argument('-emb-path', type=str, default=os.getcwd(), help="the path to the word vector file")
+parser.add_argument('-char-vector', type=str, default='none',
+                    help="use of vectors [default: none. options: 'char.wiki' or 'none]")
+parser.add_argument('-char-emb-path', type=str, default=os.getcwd(), help="the path to the char vector file")
+
 parser.add_argument('-min-freq', type=int, default=1, help='minimal frequency to be added to vocab')
 parser.add_argument('-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
 parser.add_argument('-word-optimizer', type=str, default='adadelta', help="optimizer for all the models [default: SGD. options: 'sgd' or 'adam' or 'adadelta]")
@@ -94,32 +98,13 @@ elif args.word_vector == 'w2v':
 else:
     args.word_vector = None
 
-
-# load SST dataset
-def sst(text_field, label_field, **kargs):
-    train_data, dev_data, test_data = datasets.SST.splits(text_field, label_field, fine_grained=True)
-    text_field.build_vocab(train_data, dev_data, test_data)
-    label_field.build_vocab(train_data, dev_data, test_data)
-    train_iter, dev_iter, test_iter = data.BucketIterator.splits(
-        (train_data, dev_data, test_data),
-        batch_sizes=(args.batch_size,
-                     len(dev_data),
-                     len(test_data)),
-        **kargs)
-    return train_iter, dev_iter, test_iter
-
-
-# load MR dataset
-def mr(text_field, label_field, **kargs):
-    train_data, dev_data = mydatasets.MR.splits(text_field, label_field)
-    text_field.build_vocab(train_data, dev_data)
-    label_field.build_vocab(train_data, dev_data)
-    train_iter, dev_iter = data.Iterator.splits(
-        (train_data, dev_data),
-        batch_sizes=(args.batch_size, len(dev_data)),
-        **kargs)
-    return train_iter, dev_iter
-
+if args.char_vector == 'none':
+    args.char_vector = None
+elif args.char_vector == 'char.wiki':
+    if args.word_embed_dim != 16:
+        raise Exception("char has no other kind of vectors than 16")
+else:
+    raise Exception("invalid char embedding name")
 
 # load VP dataset
 def vp(text_field, label_field, foldid, num_experts=0, **kargs):
@@ -202,13 +187,13 @@ for xfold in range(args.xfolds):
     print("\nLoading data...")
 
     tokenizer = data.Pipeline(vpdataset.clean_str)
-    text_field = data.Field(lower=True, tokenize=char_tokenizer)
+    char_field = data.Field(lower=True, tokenize=char_tokenizer)
     word_field = data.Field(lower=True, tokenize=tokenizer)
     label_field = data.Field(sequential=False, use_vocab=False, preprocessing=int)
 
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, num_experts=args.num_experts,
+    train_iter, dev_iter, test_iter = vp(char_field, label_field, foldid=xfold, num_experts=args.num_experts,
                                          device=args.device, repeat=False, sort=False
-                                         , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
+                                         , wv_type=args.char_vector, wv_dim=args.char_embed_dim, wv_dir=args.char_emb_path, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
                                                        num_experts=args.num_experts, device=args.device,
                                                        repeat=False, sort=False, wv_type=args.word_vector,
@@ -232,7 +217,7 @@ for xfold in range(args.xfolds):
         print("\t{}={}".format(attr.upper(), value), file=log_file_handle)
 
     # char CNN training and dev
-    args.embed_num = len(text_field.vocab)
+    args.embed_num = len(char_field.vocab)
     args.lr = args.char_lr
     args.l2 = args.char_l2
     args.epochs = args.char_epochs
@@ -247,9 +232,9 @@ for xfold in range(args.xfolds):
         print("  {}={}".format(attr.upper(), value))
 
     if args.snapshot is None and args.num_experts == 0:
-        char_cnn = model.CNN_Text(args, 'char')
+        char_cnn = model.CNN_Text(args, 'char', vectors=label_field.vocab.vectors)
     elif args.snapshot is None and args.num_experts > 0:
-        char_cnn = [model.CNN_Text(args, 'char') for i in range(args.num_experts)]
+        char_cnn = [model.CNN_Text(args, 'char', vectors=label_field.vocab.vectors) for i in range(args.num_experts)]
     else:
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
@@ -345,9 +330,9 @@ for xfold in range(args.xfolds):
             print("Sorry, This snapshot doesn't exist.");
             exit()
 
-    train_iter, dev_iter, test_iter = vp(text_field, label_field, foldid=xfold, device=args.device, repeat=False,
+    train_iter, dev_iter, test_iter = vp(char_field, label_field, foldid=xfold, device=args.device, repeat=False,
                                          shuffle=False, sort=False
-                                         , wv_type=None, wv_dim=None, wv_dir=None, min_freq=1)
+                                         , wv_type=args.char_vector, wv_dim=args.char_embed_dim, wv_dir=args.char_emb_path, min_freq=1)
     train_iter_word, dev_iter_word, test_iter_word = vp(word_field, label_field, foldid=xfold,
                                                         device=args.device,
                                                         repeat=False, sort=False, shuffle=False,
