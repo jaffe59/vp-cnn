@@ -177,9 +177,9 @@ orig_save_dir = args.save_dir
 update_args = True
 
 indices = calc_indices(args)
-labels = read_in_labels('labels.txt')
-dialogues = read_in_dialogues('wilkins_corrected.shuffled.51.indices')
-chats = read_in_chat('stats.16mar2017.csv', dialogues)
+labels = read_in_labels('data/labels.txt')
+dialogues = read_in_dialogues('data/wilkins_corrected.shuffled.51.indices')
+chats = read_in_chat('data/stats.1_prev_no_resp.csv', dialogues)
 
 for xfold in range(args.xfolds):
     print("Fold {0}".format(xfold))

@@ -22,8 +22,8 @@ def main(data_file, dialogue_file, shuffled_data_file, indices_file):
     shuffle_data(data_list, dialogues, shuffled_data_file, indices_file)
 
 if __name__ == '__main__':
-    dialogue_file = 'corrected.tsv'
-    data_file = 'wilkins_corrected.tsv'
+    dialogue_file = 'data/corrected.tsv'
+    data_file = 'data/wilkins_corrected.tsv'
     a = random.randint(0, 100)
     shuffled_data_file = 'wilkins_corrected.shuffled.'+str(a)+'.txt'
     indices_file = 'wilkins_corrected.shuffled.'+str(a)+'.indices'
