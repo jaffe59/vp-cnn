@@ -232,9 +232,9 @@ for xfold in range(args.xfolds):
         print("  {}={}".format(attr.upper(), value))
 
     if args.snapshot is None and args.num_experts == 0:
-        char_cnn = model.CNN_Text(args, 'char', vectors=label_field.vocab.vectors)
+        char_cnn = model.CNN_Text(args, 'char', vectors=char_field.vocab.vectors)
     elif args.snapshot is None and args.num_experts > 0:
-        char_cnn = [model.CNN_Text(args, 'char', vectors=label_field.vocab.vectors) for i in range(args.num_experts)]
+        char_cnn = [model.CNN_Text(args, 'char', vectors=char_field.vocab.vectors) for i in range(args.num_experts)]
     else:
         print('\nLoading model from [%s]...' % args.snapshot)
         try:

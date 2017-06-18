@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import argparse
 import os
+import re
 '''
 this standalone script is for generating character-based embeddings trained on custom data.
 it uses gensim to train with w2v skipgram
@@ -39,11 +40,16 @@ def create_embeddings(data, size=16):
 def printout_embeds(char_embs, char_embs_file):
     with open(char_embs_file, 'w') as o:
         for word in char_embs.vocab:
+            if word == ' ':
+                word = '\space'
             arr = np.array_str(char_embs[word])
             arr = arr.replace('\n', '')
-            arr = arr.replace('  ', ' ')
+            arr = re.sub('\s+', ' ', arr)
             arr = arr[1:-1]
-            print(word+arr, file=o)
+            if arr.startswith(' '):
+                print(word+arr, file=o)
+            else:
+                print(word + ' ' + arr, file=o)
 
 
 if __name__ == '__main__':
